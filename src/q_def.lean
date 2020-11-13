@@ -1,7 +1,7 @@
 import finset.powerset
 import finset.lattice
 
-local prefix `𝒫`:100 := λ {α : Type} (s : finset α), {t // t ∈ s.powerset}
+local prefix `𝒫`:100 := λ {α : Type} (s : finset α), {t // t ≤ s}
 
 section
 variables {α : Type*} [semilattice_sup_bot α] (r : α → α → Prop)
@@ -13,7 +13,58 @@ inductive q : α → Prop
 end
 
 section
-variables {α : Type*} [bounded_lattice α] {r : α → α → Prop}
+set_option old_structure_cmd true
+
+class bounded_join_semilattice (α : Type*) extends order_top α, semilattice_sup_bot α
+
+variables {α : Type*} [semilattice_sup_bot α] {a : α}
+
+instance semi_sup_bot_of_bdd_above : semilattice_sup_bot {b // b ≤ a} :=
+subtype.semilattice_sup_bot bot_le (fun b c hb hc, sup_le hb hc)
+
+instance : bounded_join_semilattice {b // b ≤ a} :=
+{ top := ⟨a, le_refl a⟩,
+  le_top := λ ⟨b, h⟩, h,
+  ..semi_sup_bot_of_bdd_above }
+
+variables {r : α → α → Prop} {r_ : {b // b ≤ a} → {b // b ≤ a} → Prop}
+variables (hr' : ∀ b c, r ↑c ↑b ↔ r_ c b)
+
+include hr'
+
+lemma q_on_subsets_of_q : ∀ b, q r ↑b → q r_ b :=
+begin
+  rintros ⟨b, hb⟩ (hb' : q r b),
+  induction hb' with b c hlt hr hq hq',
+  { exact q.base, },
+  { have hc := trans (le_of_lt hlt) hb,
+    apply @q.succ _ _ r_ ⟨b, hb⟩ ⟨c, hc⟩ hlt,
+    { rwa ←hr', },
+    { apply hq', }, },
+end
+
+lemma q_of_q_on_subsets : ∀ b, q r_ b → q r ↑b :=
+begin
+  rintros b hb,
+  induction hb with b c hlt hr hq hq',
+  { exact q.base, },
+  { apply @q.succ _ _ r b c hlt,
+    { rwa hr', },
+    { exact hq', }, },
+end
+
+lemma q_iff_q_on_subsets : ∀ b, q r ↑b ↔ q r_ b :=
+begin
+  intro b,
+  split,
+  { exact q_on_subsets_of_q hr' b, },
+  { exact q_of_q_on_subsets hr' b, },
+end
+
+end
+
+section
+variables {α : Type*} [bounded_join_semilattice α] {r : α → α → Prop}
 
 variable hr₁ (b c d : α) : c < ⊤ → d ≤ c → r d b → r c b
 variable hr₂ (b c d : α) : r d b → r d c → r d (b ⊔ c)
@@ -69,42 +120,6 @@ end
 
 end
 
-section     --should be in finset.basic? section decidable_eq
-open finset
-variables {β : Type} [decidable_eq β] {A : finset β}
-
-instance lattice_of_bdd_above_finset : lattice (𝒫 A) :=
-begin
-  apply subtype.lattice,
-  { simp_rw mem_powerset,
-    intros B C,
-    exact union_subset, },
-  { simp_rw mem_powerset,
-    intros B C hB,
-    apply subset.trans,
-    apply inter_subset_right, },
-end
-
-instance bdd_lattice_of_bdd_above_finset : bounded_lattice (𝒫 A) :=
-{ bot := ⟨∅, empty_mem_powerset A⟩,
-  bot_le := λ ⟨B, hB⟩, empty_subset B,
-  top := ⟨A, mem_powerset_self A⟩,
-  le_top := λ ⟨B, hB⟩, mem_powerset.1 hB,
-  ..lattice_of_bdd_above_finset }
-
-lemma strong_induction' {p : 𝒫 A → Sort*} : (∀ C, (∀ D, D < C → p D) → p C) → (∀ B, p B) :=
-begin
-  rintros ih ⟨B, hB⟩,
-  revert hB,
-  apply strong_induction_on B,
-  intros C ih' hC,
-  apply ih,
-  rintros ⟨D, hD⟩ hD',
-  exact ih' D hD' hD,
-end
-
-end
-
 section
 
 variables {β : Type} [decidable_eq β]
@@ -112,7 +127,11 @@ variables {A : finset β} (r : 𝒫 A → 𝒫 A → Prop) [decidable_rel r]
 
 variable [decidable_pred (q r)] --should be able to prove this
 
-def φ : 𝒫 A := (A.powerset.attach.filter (q r)).sup id
+def map_id : {B // B ∈ A.powerset} → {B // B ≤ A} :=
+subtype.map id (λ B, finset.mem_powerset.mp)
+
+def φ : 𝒫 A :=
+((A.powerset.attach.image map_id).filter (q r)).sup id
 
 variable hr₁ (B C D : 𝒫 A) : C < ⊤ → D ≤ C → r D B → r C B
 variable hr₂ (B C D : 𝒫 A) : r D B → r D C → r D (B ⊔ C)
