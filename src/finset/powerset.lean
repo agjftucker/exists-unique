@@ -8,15 +8,27 @@ variables {α : Type*}
 
 section powerset
 
-variables (p : finset α → Prop) [decidable_pred p]
+variables (p : finset α → Prop) [decidable_eq α]
 
-instance decidable_exists_of_subsets (s : finset α) : decidable (∃ t ⊆ s, p t) :=
-decidable_of_iff (∃ t (h : t ∈ s.powerset), p t) $ by finish
-
-variable [decidable_eq α]
-
-instance decidable_exists_of_ssubsets (s : finset α) : decidable (∃ t ⊂ s, p t) :=
-decidable_of_iff (∃ t (h : t ∈ s.powerset) (h' : ¬ s ⊆ t), p t) $ by finish
+def decidable_exists_of_ssubsets (s : finset α) :
+  (∀ t ⊂ s, decidable (p t)) → decidable (∃ t ⊂ s, p t) :=
+begin
+  intro h,
+  suffices : decidable (∃ t (h₁ : t ∈ s.powerset) (h₂ : ¬ s ⊆ t), p t),
+  { apply decidable_of_decidable_of_iff this,
+    split,
+    { rintros ⟨t, h₁, h₂, h₃⟩,
+      use [t, ⟨mem_powerset.1 h₁, h₂⟩, h₃], },
+    { rintros ⟨t, ⟨h₁, h₂⟩, h₃⟩,
+      use [t, mem_powerset.2 h₁, h₂, h₃], }, },
+  apply @finset.decidable_dexists_finset _ _ _ _,
+  intros t h₁,
+  suffices : ¬ s ⊆ t → decidable (p t),
+  { apply @exists_prop_decidable _ _ _ this, },
+  intro h₂,
+  apply h,
+  use [mem_powerset.1 h₁, h₂],
+end
 
 end powerset
 end finset

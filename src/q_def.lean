@@ -3,14 +3,15 @@ import finset.lattice
 
 local prefix `𝒫`:100 := λ {α : Type} (s : finset α), {t // t ≤ s}
 
-section
-variables {α : Type*} [semilattice_sup_bot α] (r : α → α → Prop)
+section q_definition
+
+variables {α : Type*} [order_bot α] (r : α → α → Prop)
 
 inductive q : α → Prop
 | base : q ⊥
 | succ {b c : α} : c < b → r c b → q c → q b
 
-end
+end q_definition
 
 section
 set_option old_structure_cmd true
@@ -20,17 +21,17 @@ class bounded_join_semilattice (α : Type*) extends order_top α, semilattice_su
 variables {α : Type*} [semilattice_sup_bot α] {a : α}
 
 instance semi_sup_bot_of_bdd_above : semilattice_sup_bot {b // b ≤ a} :=
-subtype.semilattice_sup_bot bot_le (fun b c hb hc, sup_le hb hc)
+subtype.semilattice_sup_bot bot_le (fun _ _, sup_le)
 
 instance : bounded_join_semilattice {b // b ≤ a} :=
-{ top := ⟨a, le_refl a⟩,
+{ top := ⟨a, refl _⟩,
   le_top := λ ⟨b, h⟩, h,
   ..semi_sup_bot_of_bdd_above }
 
 variables {r : α → α → Prop} {r_ : {b // b ≤ a} → {b // b ≤ a} → Prop}
-variables (hr' : ∀ b c, r ↑c ↑b ↔ r_ c b)
+variables (hr_ : ∀ b c, c < b → (r ↑c ↑b ↔ r_ c b))
 
-include hr'
+include hr_
 
 lemma q_on_subsets_of_q : ∀ b, q r ↑b → q r_ b :=
 begin
@@ -39,7 +40,7 @@ begin
   { exact q.base, },
   { have hc := trans (le_of_lt hlt) hb,
     apply @q.succ _ _ r_ ⟨b, hb⟩ ⟨c, hc⟩ hlt,
-    { rwa ←hr', },
+    { rwa ←(hr_ ⟨b, hb⟩ ⟨c, hc⟩ hlt), },
     { apply hq', }, },
 end
 
@@ -49,101 +50,175 @@ begin
   induction hb with b c hlt hr hq hq',
   { exact q.base, },
   { apply @q.succ _ _ r b c hlt,
-    { rwa hr', },
+    { rwa (hr_ b c hlt), },
     { exact hq', }, },
 end
 
-lemma q_iff_q_on_subsets : ∀ b, q r ↑b ↔ q r_ b :=
+lemma q_iff : ∀ b, q r ↑b ↔ q r_ b :=
 begin
   intro b,
   split,
-  { exact q_on_subsets_of_q hr' b, },
-  { exact q_of_q_on_subsets hr' b, },
+  { exact q_on_subsets_of_q hr_ b, },
+  { exact q_of_q_on_subsets hr_ b, },
 end
 
-end
-
-section
-variables {α : Type*} [bounded_join_semilattice α] {r : α → α → Prop}
-
-variable hr₁ (b c d : α) : c < ⊤ → d ≤ c → r d b → r c b
-variable hr₂ (b c d : α) : r d b → r d c → r d (b ⊔ c)
-
-include hr₁
-
-lemma hr₄ {b : α} : ⊥ < b → b < ⊤ → q r b → r b b :=
+lemma q_eq : q r_ = (q r) ∘ coe :=
 begin
-  intros hb ht hq,
-  rcases hq with _ | ⟨_, c, hlt, hr, hq⟩,
-  { exfalso,
-    exact not_lt_bot hb, },
-  { exact hr₁ _ _ _ ht (le_of_lt hlt) hr, },
-end
-
-include hr₂
-
-lemma hr₅ {b c d : α} : b ⊔ d < ⊤ → r d c → q r b → r (b ⊔ d) (b ⊔ c) :=
-begin
-  intros ht hr hq,
-  cases lt_or_eq_of_le (order_bot.bot_le b) with hb hb,
-  { apply hr₂,
-    { apply hr₁ _ _ _ ht le_sup_left,
-      refine hr₄ hr₁ hb _ hq,
-      exact lt_of_le_of_lt le_sup_left ht, },
-    { exact hr₁ _ _ _ ht le_sup_right hr, }, },
-  { rw [← hb, bot_sup_eq, bot_sup_eq],
-    exact hr, },
-end
-
-lemma q_of_sup_of_foreach : ∀ b c, q r b → q r c → q r (b ⊔ c) :=
-begin
-  rintros b c hb hc,
-  apply hc.rec_on,
-  { convert hb,
-    exact sup_bot_eq, },
-  { intros c d hd hr hq,
-    cases lt_or_eq_of_le (sup_le_sup_left (le_of_lt hd) b) with hlt he,
-    { apply q.succ hlt,
-      exact hr₅ hr₁ hr₂ (lt_of_lt_of_le hlt le_top) hr hb, },
-    { intro h,
-      rwa ←he, }, },
-end
-
-lemma q_of_sup_of_forall (s : finset α) : (∀ b ∈ s, q r b) → q r (s.sup id) :=
-begin
-  intro h,
-  apply finset.of_sup_of_forall,
-  apply q.base,
-  apply q_of_sup_of_foreach hr₁ hr₂,
-  exact h,
+  funext b,
+  rw ←(q_iff hr_),
 end
 
 end
 
-section
+namespace subtype
+
+variables {α : Type*}
+
+def order_bot [order_bot α] {P : α → Prop} (Pbot : P ⊥) : order_bot {x : α // P x} :=
+{ bot := ⟨⊥, Pbot⟩,
+  bot_le := λ x, bot_le,
+  ..subtype.partial_order P }
+
+end subtype
+
+namespace si  --structural induction
 
 variables {β : Type} [decidable_eq β]
-variables {A : finset β} (r : 𝒫 A → 𝒫 A → Prop) [decidable_rel r]
 
-variable [decidable_pred (q r)] --should be able to prove this
+section decidable₁
 
-def map_id : {B // B ∈ A.powerset} → {B // B ≤ A} :=
-subtype.map id (λ B, finset.mem_powerset.mp)
+variables {𝒮 : set (finset β)}
+
+def strong_induction {p : 𝒮 → Sort*} : (∀ (B : 𝒮), (∀ C, C < B → p C) → p B) → (∀ B, p B) :=
+fun h', suffices h : ∀ (B : finset β) (hB : B ∈ 𝒮), p ⟨B, hB⟩, from (fun ⟨B, hB⟩, h B hB),
+finset.strong_induction (fun B ih hB, h' ⟨B, hB⟩ (fun ⟨C, hC⟩ hlt, ih C hlt hC))
+
+variables [decidable_pred 𝒮] (𝒮bot : 𝒮 ⊥)
+include 𝒮bot
+
+variables (r : 𝒮 → 𝒮 → Prop) [decidable_rel r]
+
+def decidable_of_ssubsets : let 𝒮b := subtype.order_bot 𝒮bot in
+  ∀ B, (∀ C < B, decidable (@q _ 𝒮b r C)) → decidable (@q _ 𝒮b r B) :=
+begin
+  intros 𝒮b B ih,
+  by_cases hB : B = 𝒮b.bot,
+  { apply is_true,
+    rw hB,
+    apply q.base, },
+  have : ∀ (C : finset β) (hlt : C < B), decidable (∃ (h : 𝒮 C), r ⟨C, h⟩ B ∧ @q _ 𝒮b r ⟨C, h⟩),
+  { intros C hlt,
+    apply @exists_prop_decidable _ _ _ _,
+    apply_instance,
+    intro hC,
+    apply @and.decidable _ _ _ _,
+    apply_instance,
+    exact ih ⟨C, hC⟩ hlt, },
+  cases finset.decidable_exists_of_ssubsets _ _ this with hne he,
+  { apply is_false,
+    intro hq,
+    rcases hq with _ | ⟨_, ⟨C, hC⟩, hlt, hr, hq⟩,
+    { apply hB,
+      refl, },
+    { apply hne,
+      refine ⟨C, _, hC, hr, hq⟩,
+      exact hlt, }, },
+  { apply is_true,
+    rcases he with ⟨C, hlt, hC, hr, hq⟩,
+    apply @q.succ _ 𝒮b _ _ ⟨C, hC⟩ hlt hr hq, },
+end
+
+instance q_decidable₁ : decidable_pred (@q _ (subtype.order_bot 𝒮bot) r) :=
+strong_induction (decidable_of_ssubsets 𝒮bot r)
+
+end decidable₁
+
+section decidable₂
+
+variables {r : finset β → finset β → Prop} [decidable_rel r]
+
+instance q_decidable₂ : decidable_pred (q r) :=
+begin
+  intro A,
+  let 𝒮b := @subtype.order_bot (finset β) _ set.univ trivial,
+  apply decidable_of_iff (@q _ 𝒮b (fun C B, r ↑C ↑B) ⟨A, trivial⟩),
+  split,
+  { intro hq,
+    apply @q.rec_on _ 𝒮b _ (fun B, q r ↑B) _ hq,
+    { apply q.base, },
+    { intros B C hlt hr hq hq',
+      apply @q.succ (finset β) _ _ _ _ hlt hr hq', }, },
+  { intro hq,
+    apply q.rec_on hq,
+    { apply q.base, },
+    { intros B C hlt hr hq hq',
+      apply @q.succ _ 𝒮b _ ⟨B, trivial⟩ ⟨C, trivial⟩ hlt,
+      { exact hr, },
+      { exact hq', }, }, },
+end
+
+end decidable₂
+
+section φ_definition
+
+variables {A : finset β} (r_ : 𝒫 A → 𝒫 A → Prop) [decidable_rel r_]
+
+def id' : {B // B ∈ A.powerset} ↪ 𝒫 A :=
+(function.embedding.refl _).subtype_map (λ B, finset.mem_powerset.mp)
 
 def φ : 𝒫 A :=
-((A.powerset.attach.image map_id).filter (q r)).sup id
+((A.powerset.attach.map id').filter (q r_)).sup id
 
-variable hr₁ (B C D : 𝒫 A) : C < ⊤ → D ≤ C → r D B → r C B
-variable hr₂ (B C D : 𝒫 A) : r D B → r D C → r D (B ⊔ C)
+end φ_definition
 
-include hr₁ hr₂
+section φ_properties
 
-example : q r (φ r) :=
+variables {r : finset β → finset β → Prop} [decidable_rel r]
+
+variables {A : finset β} {rA : 𝒫 A → 𝒫 A → Prop} [decidable_rel rA]
+variables (hrA : ∀ C D, D < C → (r ↑D ↑C ↔ rA D C))
+include hrA
+
+lemma le_φ_of_q : ∀ (B : 𝒫 A), q r ↑B → B ≤ φ rA :=
 begin
-  apply q_of_sup_of_forall hr₁ hr₂,
-  intros B hB,
-  rw finset.mem_filter at hB,
-  exact hB.2,
+  rintros ⟨B, hB⟩ hq,
+  apply @finset.le_sup (𝒫 A) _ _ _ id,
+  rw finset.mem_filter,
+  split,
+  { rw finset.mem_map,
+    use [B, finset.mem_powerset.2 hB, finset.mem_attach _ _, rfl], },
+  { rwa q_iff hrA at hq, },
 end
 
+lemma φ_eq : (φ rA : finset β) = (A.powerset.filter (q r)).sup id :=
+begin
+  rw [φ, finset.sup_coe],
+  simp [q_eq hrA],
+  repeat { rw finset.sup_def, },
+  congr' 1,
+  let coe' : {B // B ≤ A} ↪ finset β := function.embedding.subtype _,
+  have h' : id'.trans coe' = function.embedding.subtype _ := rfl,
+  conv_lhs
+  { erw [←(finset.map_val coe'), ←finset.map_filter],
+    rw [finset.map_map, h', finset.attach_map_val], },
+  conv_rhs
+  { rw multiset.map_id, },  
 end
+
+variables {B : finset β} {rB : 𝒫 B → 𝒫 B → Prop} [decidable_rel rB]
+variables (hrB : ∀ C D, D < C → (r ↑D ↑C ↔ rB D C))
+
+include hrB
+
+lemma φ_mono : B ≤ A → (φ rB : finset β) ≤ φ rA :=
+begin
+  intro h,
+  rw [φ_eq hrA, φ_eq hrB],
+  refine finset.sup_mono _,
+  apply finset.filter_subset_filter,
+  rwa finset.powerset_mono,
+end
+
+end φ_properties
+
+end si
