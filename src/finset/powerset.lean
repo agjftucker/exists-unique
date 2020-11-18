@@ -8,9 +8,9 @@ variables {α : Type*}
 
 section powerset
 
-variables (p : finset α → Prop) [decidable_eq α]
+variables {p : finset α → Prop} [decidable_eq α]
 
-def decidable_exists_of_ssubsets (s : finset α) :
+def decidable_exists_of_ssubsets {s : finset α} :
   (∀ t ⊂ s, decidable (p t)) → decidable (∃ t ⊂ s, p t) :=
 begin
   intro h,

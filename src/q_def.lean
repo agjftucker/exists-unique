@@ -114,7 +114,7 @@ begin
     apply @and.decidable _ _ _ _,
     apply_instance,
     exact ih ⟨C, hC⟩ hlt, },
-  cases finset.decidable_exists_of_ssubsets _ _ this with hne he,
+  cases finset.decidable_exists_of_ssubsets this with hne he,
   { apply is_false,
     intro hq,
     rcases hq with _ | ⟨_, ⟨C, hC⟩, hlt, hr, hq⟩,
