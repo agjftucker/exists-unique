@@ -34,7 +34,7 @@ variable (ℰ : equity_function 𝒩 T)
 def v_ {A : finset 𝒩} (ψ : ∀ B < A, Tt T → X 𝒩 → 𝒫 B) : ∀ B < A, debt_fn 𝒩 T :=
 finset.strong_induction (fun B υ hB, v_mk ℋ (ψ B hB) (fun C hC, υ C hC (trans hC hB)))
 
-lemma v_eq_v_ {ψ : ∀ B, Tt T → X 𝒩 → 𝒫 B} :
+lemma v_eq {ψ : ∀ B, Tt T → X 𝒩 → 𝒫 B} :
   ∀ A B (hB : B < A), v ℋ ψ B = v_ ℋ (fun C _, ψ C) B hB :=
 λ A, finset.strong_induction
 begin
@@ -46,7 +46,7 @@ begin
   exact ih C hC (trans hC hB),
 end
 
-section construct_φ
+section φc
 
 variables {A : finset 𝒩} (φ_ : ∀ B < A, Tt T → X 𝒩 → 𝒫 B)
 
@@ -56,45 +56,79 @@ def r_ (t : Tt T) (y : X 𝒩) (C B : 𝒫 A) : Prop :=
 ∃ (hC : ↑C < A), ∀ i ∈ (B : finset 𝒩), 0 < E_star ℰ (u_ ℋ φ_ C hC) t y i
 
 noncomputable instance (t : Tt T) (y : X 𝒩) : decidable_rel (r_ ℋ ℰ φ_ t y) :=
-fun _ _, exists_prop_decidable _
+by { delta r_, apply_instance, }
 
 variable (A)
 
 noncomputable def φ_mk : Tt T → X 𝒩 → 𝒫 A :=
 λ t y, si.φ (r_ ℋ ℰ φ_ t y)
 
-end construct_φ
+end φc
 
 noncomputable def φ : ∀ (A : finset 𝒩), Tt T → X 𝒩 → 𝒫 A :=
 finset.strong_induction (φ_mk ℋ ℰ)
+
+def U : finset 𝒩 → Tt T → set (X 𝒩) := V (φ ℋ ℰ)
 
 noncomputable def u : finset 𝒩 → debt_fn 𝒩 T := v ℋ (φ ℋ ℰ)
 
 def r (t : Tt T) (y : X 𝒩) (C B : finset 𝒩) : Prop :=
 ∀ i ∈ B, 0 < E_star ℰ (u ℋ ℰ C) t y i
 
-noncomputable instance (t : Tt T) (y : X 𝒩) : decidable_rel (r ℋ ℰ t y) :=
-fun _ _, finset.decidable_dforall_finset
+def r' (A : finset 𝒩) (t : Tt T) (y : X 𝒩) (C B : 𝒫 A) : Prop :=
+r ℋ ℰ t y ↑C ↑B
 
-lemma r_iff {t : Tt T} {y : X 𝒩} (A : finset 𝒩) :
-  ∀ (B C : 𝒫 A), C < B → (r ℋ ℰ t y C B ↔ r_ ℋ ℰ (fun D < A, φ ℋ ℰ D) t y C B) :=
+noncomputable instance (t : Tt T) (y : X 𝒩) : decidable_rel (r ℋ ℰ t y) :=
+by { delta r, apply_instance, }
+
+noncomputable instance (A : finset 𝒩) (t : Tt T) (y : X 𝒩) : decidable_rel (r' ℋ ℰ A t y) :=
+by { delta r', apply_instance, }
+
+variables {ℋ} {ℰ}
+
+lemma hr2 {A : finset 𝒩} {t : Tt T} {y : X 𝒩} (B C D : 𝒫 A) :
+  r ℋ ℰ t y D B → r ℋ ℰ t y D C → r ℋ ℰ t y D (B ⊔ C) :=
+begin
+  intros rDB rDC i hi,
+  cases finset.mem_union.mp hi with hB hC,
+  { exact rDB i hB, },
+  { exact rDC i hC, },
+end
+
+lemma r_iff' {t : Tt T} {y : X 𝒩} (A : finset 𝒩) :
+  ∀ (B C : 𝒫 A), C < B → (r ℋ ℰ t y ↑C ↑B ↔ r' ℋ ℰ A t y C B) :=
+fun B C hlt, by refl
+
+lemma r_iff_ (A : finset 𝒩) {t : Tt T} {y : X 𝒩} :
+  ∀ (B C : 𝒫 A), C < B → (r ℋ ℰ t y ↑C ↑B ↔ r_ ℋ ℰ (fun D _, φ ℋ ℰ D) t y C B) :=
 begin
   rintros ⟨B, hB⟩ ⟨C, hC⟩ hlt,
   split,
   { intro hr,
     use lt_of_lt_of_le hlt hB,
-    rwa [u_, ←v_eq_v_], },
+    rwa [u_, ←v_eq], },
   { rintros ⟨hC, hr_⟩,
-    rwa [u_, ←v_eq_v_] at hr_, },
+    rwa [u_, ←v_eq] at hr_, },
 end
 
-def U : finset 𝒩 → Tt T → set (X 𝒩) := V (φ ℋ ℰ)
+lemma φ_eq {t : Tt T} {y : X 𝒩} (A : finset 𝒩) :
+  φ ℋ ℰ A t y = si.φ (r' ℋ ℰ A t y) :=
+begin
+  conv_lhs
+  { rw [φ, finset.strong_induction_eq, ←φ],
+    change si.φ (r_ ℋ ℰ (fun B < A, φ ℋ ℰ B) t y), },
+  rw [si.φ, si.φ],
+  congr' 2,
+  ext C,
+  rw ←q_iff (r_iff_ A),
+  rw q_iff (r_iff' A),
+end
 
-lemma mem_U_of_q (A : finset 𝒩) {t : Tt T} (y : X 𝒩) : q (r ℋ ℰ t y) A → y ∈ U ℋ ℰ A t :=
+lemma mem_U_of_q {A : finset 𝒩} {t : Tt T} {y : X 𝒩} : q (r ℋ ℰ t y) A → y ∈ U ℋ ℰ A t :=
 begin
   intro hq,
   rw [U, V, φ, finset.strong_induction_eq, ←φ],
-  apply si.le_φ_of_q (r_iff ℋ ℰ A) ⟨A, refl _⟩,
+  apply si.le_φ_of_q (r_iff_ A) ⟨A, refl _⟩,
   exact hq,
   apply_instance,
 end
@@ -104,6 +138,6 @@ begin
   intros hB t y,
   conv_lhs { rw [φ, finset.strong_induction_eq, ←φ], },
   conv_rhs { rw [φ, finset.strong_induction_eq, ←φ], },
-  apply si.φ_mono (r_iff ℋ ℰ A) (r_iff ℋ ℰ B) hB,
+  apply si.φ_mono (r_iff_ A) (r_iff_ B) hB,
   apply_instance,
 end

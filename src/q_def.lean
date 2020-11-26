@@ -25,7 +25,7 @@ subtype.semilattice_sup_bot bot_le (fun _ _, sup_le)
 
 instance : bounded_join_semilattice {b // b ≤ a} :=
 { top := ⟨a, refl _⟩,
-  le_top := λ ⟨b, h⟩, h,
+  le_top := fun ⟨b, h⟩, h,
   ..semi_sup_bot_of_bdd_above }
 
 variables {r : α → α → Prop} {r_ : {b // b ≤ a} → {b // b ≤ a} → Prop}
@@ -65,7 +65,7 @@ end
 lemma q_eq : q r_ = (q r) ∘ coe :=
 begin
   funext b,
-  rw ←(q_iff hr_),
+  rw ←q_iff hr_,
 end
 
 end
@@ -164,7 +164,7 @@ section φ_definition
 variables {A : finset β} (r_ : 𝒫 A → 𝒫 A → Prop) [decidable_rel r_]
 
 def id' : {B // B ∈ A.powerset} ↪ 𝒫 A :=
-(function.embedding.refl _).subtype_map (λ B, finset.mem_powerset.mp)
+(function.embedding.refl _).subtype_map (fun B, finset.mem_powerset.mp)
 
 def φ : 𝒫 A :=
 ((A.powerset.attach.map id').filter (q r_)).sup id
@@ -194,15 +194,14 @@ lemma φ_eq : (φ rA : finset β) = (A.powerset.filter (q r)).sup id :=
 begin
   rw [φ, finset.sup_coe],
   simp [q_eq hrA],
-  repeat { rw finset.sup_def, },
-  congr' 1,
-  let coe' : {B // B ≤ A} ↪ finset β := function.embedding.subtype _,
-  have h' : id'.trans coe' = function.embedding.subtype _ := rfl,
+  rw [finset.sup_def, finset.sup_def, multiset.map_id],
+  congr,
+  let coe' : 𝒫 A ↪ finset β := function.embedding.subtype _,
   conv_lhs
-  { erw [←(finset.map_val coe'), ←finset.map_filter],
-    rw [finset.map_map, h', finset.attach_map_val], },
-  conv_rhs
-  { rw multiset.map_id, },  
+  { change ((A.powerset.attach.map id').filter (q r ∘ coe')).val.map coe',
+    rw [←finset.map_val, ←finset.map_filter, finset.map_map], },
+  congr,
+  exact finset.attach_map_val,
 end
 
 variables {B : finset β} {rB : 𝒫 B → 𝒫 B → Prop} [decidable_rel rB]

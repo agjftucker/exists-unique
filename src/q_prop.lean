@@ -59,17 +59,17 @@ end
 
 end
 
-section
+namespace si
 
 variables {β : Type} [decidable_eq β]
-variables {A : finset β} (r : 𝒫 A → 𝒫 A → Prop) [decidable_rel r]
+variables {A : finset β} {r : 𝒫 A → 𝒫 A → Prop} [decidable_rel r]
 
 variable hr₁ (B C D : 𝒫 A) : C < ⊤ → D ≤ C → r D B → r C B
 variable hr₂ (B C D : 𝒫 A) : r D B → r D C → r D (B ⊔ C)
 
 include hr₁ hr₂
 
-example : q r (si.φ r) :=
+lemma q_φ : q r (si.φ r) :=
 begin
   apply q_of_sup_of_forall hr₁ hr₂,
   intros B hB,
@@ -77,4 +77,4 @@ begin
   exact hB.2,
 end
 
-end
+end si

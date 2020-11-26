@@ -3,7 +3,7 @@ import v_def
 local prefix `𝒫`:100 := fun {α : Type} (s : finset α), {t // t ≤ s}
 
 variables {𝒩 : Type} [decidable_eq 𝒩] [inner_product_space ℝ (X 𝒩)]
-variables {T : with_top ℝ} (ℋ : well_behaved_soln 𝒩 T)
+variables {T : with_top ℝ} {ℋ : well_behaved_soln 𝒩 T}
 
 {ψ ψ' : ∀ (B : finset 𝒩), Tt T → X 𝒩 → 𝒫 B}
 
