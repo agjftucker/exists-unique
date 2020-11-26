@@ -35,18 +35,15 @@ begin
   exact h C hC (trans (le_of_lt hC) hB),
 end
 
-lemma uB_le_uA : ∀ B ≤ A, u ℋ ℰ B ≤ u ℋ ℰ A :=
-finset.strong_induction (uB_le_uA_of_uC_le_uA' p_)
-
 variable (A)
 
-lemma pA : ∀ B ≤ A, u ℋ ℰ B ≤ u ℋ ℰ A :=
-fun B hB, uB_le_uA p_ B hB
+lemma uB_le_uA : ∀ B ≤ A, u ℋ ℰ B ≤ u ℋ ℰ A :=
+finset.strong_induction (uB_le_uA_of_uC_le_uA' p_)
 
 end φp
 
 lemma u_mono : ∀ {A B : finset 𝒩}, B ≤ A → u ℋ ℰ B ≤ u ℋ ℰ A :=
-finset.strong_induction φp.pA
+finset.strong_induction φp.uB_le_uA
 
 lemma hr1 {A : finset 𝒩} {t : Tt T} {y : X 𝒩} (B C D : 𝒫 A) :
   C < ⊤ → D ≤ C → r ℋ ℰ t y D B → r ℋ ℰ t y C B :=
