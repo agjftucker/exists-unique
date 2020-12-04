@@ -1,5 +1,5 @@
-import finset.basic
 import analysis.normed_space.inner_product
+import missing_mathlib.data.finset.basic
 
 local prefix `𝒫`:100 := λ {α : Type} (s : finset α), {t // t ≤ s}
 
@@ -24,8 +24,8 @@ def continuous_wrt_assets {α : Tt T → Type*} [∀ t, topological_space (α t)
   (v : ∀ (t : Tt T), X 𝒩 → α t) : Prop :=
 ∀ t, continuous (v t)
 
-def continuous_off_wrt_assets {α : Tt T → Type*} [∀ t, topological_space (α t)]
-  {V : Tt T → set (X 𝒩)} (v' : Π t y, y ∉ V t → α t) : Prop :=
+def continuous_wrt_assets_on_compl {α : Tt T → Type*} [∀ t, topological_space (α t)]
+  {V : Tt T → set (X 𝒩)} (v' : ∀ t y, y ∉ V t → α t) : Prop :=
 ∀ t, continuous (fun y : (V t)ᶜ, v' t y y.prop)
 
 section
@@ -38,7 +38,7 @@ structure well_behaved_soln :=
 (positivity_preserving {V : Tt T → set (X 𝒩)} (v' : ∀ t y, y ∉ V t → Tτ t → ℝ) :
   (∀ t y h, 0 ≤ v' t y h) → 0 ≤ ℋ v')
 (continuity_preserving {V : Tt T → set (X 𝒩)} (v' : ∀ t y, y ∉ V t → Tτ t → ℝ) :
-  continuous_off_wrt_assets v' → continuous_wrt_assets (ℋ v'))
+  continuous_wrt_assets_on_compl v' → continuous_wrt_assets (ℋ v'))
 (translation_invariant {V : Tt T → set (X 𝒩)} (v' : ∀ t y, y ∉ V t → Tτ t → ℝ) :
   ∀ η t y, ℋ v' t (y + η) = ℋ (fun s x (h : x + η ∉ V s), v' s (x + η) h) t y)
 (compatible_on_subsets {V V' : Tt T → set (X 𝒩)} {v' : ∀ t y, y ∉ V t → Tτ t → ℝ} :
@@ -49,13 +49,16 @@ structure well_behaved_soln :=
 end
 
 instance : has_coe_to_fun (well_behaved_soln 𝒩 T) :=
-{ F := fun _, Π {V : Tt T → set (X 𝒩)} (v' : Π t y, y ∉ V t → Tτ t → ℝ), (Π t, X 𝒩 → Tτ t → ℝ),
+{ F := fun _, ∀ {V : Tt T → set (X 𝒩)} (v' : ∀ t y, y ∉ V t → Tτ t → ℝ), (∀ t, X 𝒩 → Tτ t → ℝ),
   coe := well_behaved_soln.ℋ }
 
 variable (ℋ : well_behaved_soln 𝒩 T)
 
 def V (ψ : ∀ (B : finset 𝒩), Tt T → X 𝒩 → 𝒫 B) (A : finset 𝒩) : Tt T → set (X 𝒩) :=
 fun t y, A ≤ ψ A t y
+
+instance (ψ : ∀ B, Tt T → X 𝒩 → 𝒫 B) (A : finset 𝒩) (t : Tt T) : ∀ y, decidable (y ∈ V ψ A t) :=
+by { delta V, apply_instance, }
 
 def v_mk {B : finset 𝒩} (ψB : Tt T → X 𝒩 → 𝒫 B) :
   (∀ C < B, debt_fn 𝒩 T) → debt_fn 𝒩 T :=

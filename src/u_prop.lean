@@ -5,6 +5,8 @@ local prefix `𝒫`:100 := fun {α : Type} (s : finset α), {t // t ≤ s}
 variables {𝒩 : Type} [decidable_eq 𝒩] [inner_product_space ℝ (X 𝒩)]
 variables {T : with_top ℝ} {ℋ : well_behaved_soln 𝒩 T} {ℰ : equity_function 𝒩 T}
 
+lemma u_match : ∀ A t y, u ℋ ℰ A t y = u ℋ ℰ (φ ℋ ℰ A t y) t y := v_match
+
 namespace φp
 
 variables {A : finset 𝒩}
@@ -92,21 +94,21 @@ end
 
 lemma φ_consistent (A : finset 𝒩) (t : Tt T) (y : X 𝒩) : y ∈ U ℋ ℰ A t ↔ r ℋ ℰ t y A A :=
 begin
-  rw mem_U_iff_q,
   split,
   { intros hq i hi,
+    rw mem_U_iff_q at hq,
     cases hq with _ B hlt hr hq,
     { exact false.elim hi, },
     { apply lt_of_lt_of_le (hr i hi),
       apply ℰ.mono_wrt_debt_valuation,
       apply u_mono (le_of_lt hlt), }, },
   { intro hr,
-    by_contra hn,
-    apply hn,
-    rw ←mem_U_iff_q at hn,
-    refine q.succ ⟨(φ ℋ ℰ A t y).prop, hn⟩ _ q_φ,
-    intros i hi,
-    dunfold E_star u,
-    rw ←v_match,
-    apply hr i hi, },
+    cases dec_em (y ∈ U ℋ ℰ A t) with h hn,
+    { exact h, },
+    { rw mem_U_iff_q,
+      refine q.succ ⟨(φ ℋ ℰ A t y).prop, hn⟩ _ q_φ,
+      intros i hi,
+      delta E_star,
+      rw ←u_match,
+      apply hr i hi, }, },
 end

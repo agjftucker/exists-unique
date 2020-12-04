@@ -5,6 +5,16 @@ open multiset subtype nat
 variables {α : Type*} {β : Type*} {γ : Type*}
 
 namespace finset
+
+protected theorem induction' {α : Type*} {p : finset α → Prop}
+  (h₁ : p ∅) (h₂ : ∀ ⦃a : α⦄ {s : finset α} (h : a ∉ s), p s → p (cons a s h)) : ∀ s, p s
+| ⟨s, nd⟩ := multiset.induction_on s (λ _, h₁) (λ a s IH nd, begin
+    cases nodup_cons.1 nd with m nd',
+    rw [← (eq_of_veq _ : cons a (finset.mk s _) m = ⟨a ::ₘ s, nd⟩)],
+    { exact h₂ (by exact m) (IH nd') },
+    { rw [cons_val] }
+  end) nd
+
 section card
 
 def strong_induction {p : finset α → Sort*} (ih : ∀s, (∀t ⊂ s, p t) → p s) :

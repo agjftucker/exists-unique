@@ -24,7 +24,7 @@ end
 lemma v_match : ∀ A t y, v ℋ ψ A t y = v ℋ ψ (ψ A t y) t y :=
 begin
   intros A t y,
-  by_cases hy : y ∈ V ψ A t,
+  cases dec_em (y ∈ V ψ A t) with hy hy,
   { rw le_antisymm (ψ A t y).prop hy, },
   { funext i,
     conv_lhs

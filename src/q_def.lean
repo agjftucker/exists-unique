@@ -1,5 +1,5 @@
-import finset.powerset
-import finset.lattice
+import missing_mathlib.data.finset.powerset
+import missing_mathlib.data.finset.lattice
 
 local prefix `𝒫`:100 := λ {α : Type} (s : finset α), {t // t ≤ s}
 
@@ -102,10 +102,12 @@ def decidable_of_ssubsets : let 𝒮b := subtype.order_bot 𝒮bot in
   ∀ B, (∀ C < B, decidable (@q _ 𝒮b r C)) → decidable (@q _ 𝒮b r B) :=
 begin
   intros 𝒮b B ih,
-  by_cases hB : B = 𝒮b.bot,
-  { apply is_true,
+  apply dite (B = 𝒮b.bot),
+  { intro hB,
+    apply is_true,
     rw hB,
     apply q.base, },
+  intro hB,
   have : ∀ (C : finset β) (hlt : C < B), decidable (∃ (h : 𝒮 C), r ⟨C, h⟩ B ∧ @q _ 𝒮b r ⟨C, h⟩),
   { intros C hlt,
     apply @exists_prop_decidable _ _ _ _,
