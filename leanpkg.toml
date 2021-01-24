@@ -1,8 +1,8 @@
 [package]
 name = "exists_unique"
 version = "0.1"
-lean_version = "leanprover-community/lean:3.23.0"
+lean_version = "leanprover-community/lean:3.24.0"
 path = "src"
 
 [dependencies]
-mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "396487f94e5aa52c763f94fdf269e881bb3c4022"}
+mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "49c53d4f5ae197887ca9780f14bdf9c271b55924"}

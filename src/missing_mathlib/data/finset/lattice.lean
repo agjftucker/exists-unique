@@ -84,7 +84,7 @@ begin
     apply option.some_injective,
     rwa option.some_get, },
   rw this,
-  let p' := @option.rec α (fun _, Prop) true (fun a, p a),
+  let p' := @option.rec α (fun _, Prop) true p,
   change p' (some m),
   rw ←hm,
   refine of_sup_of_forall (some ∘ f) trivial _ hs,

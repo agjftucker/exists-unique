@@ -2,15 +2,14 @@ import u_def v_prop q_prop
 
 local prefix `𝒫`:100 := fun {α : Type} (s : finset α), {t // t ≤ s}
 
-variables {𝒩 : Type} [decidable_eq 𝒩] [inner_product_space ℝ (X 𝒩)]
-variables {T : with_top ℝ} {ℋ : well_behaved_soln 𝒩 T} {ℰ : equity_function 𝒩 T}
+variables {𝒩 : Type} [decidable_eq 𝒩] {T : with_top ℝ}
+variables {ℋ : well_behaved_soln 𝒩 T} {ℰ : equity_function 𝒩 T}
 
 lemma u_match : ∀ A t y, u ℋ ℰ A t y = u ℋ ℰ (φ ℋ ℰ A t y) t y := v_match
 
 namespace φp
 
-variables {A : finset 𝒩}
-variable p_ : ∀ B < A, ∀ C ≤ B, u ℋ ℰ C ≤ u ℋ ℰ B
+variables {A : finset 𝒩} (p_ : ∀ B < A, ∀ C ≤ B, u ℋ ℰ C ≤ u ℋ ℰ B)
 include p_
 
 lemma uB_le_uA_of_uC_le_uA : ∀ B ≤ A, (∀ C < B, u ℋ ℰ C ≤ u ℋ ℰ A) → u ℋ ℰ B ≤ u ℋ ℰ A :=
@@ -47,6 +46,21 @@ end φp
 lemma u_mono : ∀ {A B : finset 𝒩}, B ≤ A → u ℋ ℰ B ≤ u ℋ ℰ A :=
 finset.strong_induction φp.uB_le_uA
 
+lemma u_eq_sup' {A : finset 𝒩} {t : Tt T} {y : X 𝒩} (h : y ∉ U ℋ ℰ A t) :
+  u ℋ ℰ A t y = A.ssubsets.sup' (ssubsets_nonempty_of_not_mem_U h) (u ℋ ℰ) t y :=
+begin
+  apply le_antisymm,
+  { rw u_match,
+    apply finset.le_sup' (u ℋ ℰ),
+    rw finset.mem_ssubsets_iff,
+    use [(φ ℋ ℰ A t y).prop, h], },
+  { apply finset.sup'_le _ (u ℋ ℰ),
+    intros B hB y,
+    apply u_mono,
+    rw finset.mem_ssubsets_iff at hB,
+    exact hB.1, },
+end
+
 lemma hr1 {A : finset 𝒩} {t : Tt T} {y : X 𝒩} (B C D : 𝒫 A) :
   C < ⊤ → D ≤ C → r ℋ ℰ t y D B → r ℋ ℰ t y C B :=
 begin
@@ -73,7 +87,7 @@ end
 lemma mem_U_iff_q {A : finset 𝒩} {t : Tt T} {y : X 𝒩} : y ∈ U ℋ ℰ A t ↔ q (r ℋ ℰ t y) A :=
 iff.intro q_of_mem_U mem_U_of_q
 
-lemma φ_idempotent {A : finset 𝒩} : ∀ t y, y ∈ U ℋ ℰ (φ ℋ ℰ A t y) t :=
+lemma φ_idempotent (A : finset 𝒩) : ∀ t y, y ∈ U ℋ ℰ (φ ℋ ℰ A t y) t :=
 -- ∀ t y, (φ ℋ ℰ (φ ℋ ℰ A t y) t y : finset 𝒩) = φ ℋ ℰ A t y :=
 begin
   intros t y,
@@ -81,10 +95,10 @@ begin
   apply q_φ,
 end
 
-lemma φ_maximal {A : finset 𝒩} {t : Tt T} {y : X 𝒩} :
-  ∀ B ≤ A, ↑(φ ℋ ℰ A t y) < B → y ∉ U ℋ ℰ B t :=
+lemma φ_maximal (A B : finset 𝒩) (t : Tt T) (y : X 𝒩) :
+  ↑(φ ℋ ℰ A t y) < B → B ≤ A → y ∉ U ℋ ℰ B t :=
 begin
-  intros B hB hφ,
+  intros hφ hB,
   rw mem_U_iff_q,
   intro hq,
   apply hφ.2,
@@ -101,7 +115,7 @@ begin
     { exact false.elim hi, },
     { apply lt_of_lt_of_le (hr i hi),
       apply ℰ.mono_wrt_debt_valuation,
-      apply u_mono (le_of_lt hlt), }, },
+      apply u_mono hlt.1, }, },
   { intro hr,
     cases dec_em (y ∈ U ℋ ℰ A t) with h hn,
     { exact h, },
@@ -112,3 +126,16 @@ begin
       rw ←u_match,
       apply hr i hi, }, },
 end
+
+section
+variables (ℋ) (ℰ)
+
+structure survivors_fn (ψ :  ∀ (A : finset 𝒩), Tt T → X 𝒩 → 𝒫 A) : Prop :=
+(idempotent : ∀ A t y, y ∈ V ψ (ψ A t y) t)
+(maximal : ∀ A B t y, ↑(ψ A t y) < B → B ≤ A → y ∉ V ψ B t)
+(consistent : ∀ A t y, y ∈ V ψ A t ↔ ∀ i ∈ A, 0 < E_star ℰ (v ℋ ψ A) t y i)
+
+end
+
+lemma exists_soln : survivors_fn ℋ ℰ (φ ℋ ℰ) :=
+⟨φ_idempotent, φ_maximal, φ_consistent⟩

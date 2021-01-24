@@ -2,14 +2,27 @@ import v_def q_def
 
 local prefix `𝒫`:100 := fun {α : Type} (s : finset α), {t // t ≤ s}
 
-variables {𝒩 : Type} [decidable_eq 𝒩] [inner_product_space ℝ (X 𝒩)]
-variables {T : with_top ℝ} (ℋ : well_behaved_soln 𝒩 T)
+variables {𝒩 : Type} [decidable_eq 𝒩] {T : with_top ℝ}
 
-def mono_wrt_assets (υ : debt_fn 𝒩 T) : Prop :=
-∀ (η : ℝ) (hr : 0 ≤ η) (t : Tt T) (y : X 𝒩), υ t (y - η) ≤ υ t y
+def mono_wrt_assets {β : Tt T → Type*} [∀ t, has_le (β t)] (f : ∀ (t : Tt T), X 𝒩 → β t) : Prop :=
+∀ {η : ℝ} (hη : 0 ≤ η) (t : Tt T) (y : X 𝒩), f t y ≤ f t (y + η)
 
 def strict_mono_wrt_assets (E : Tt T → X 𝒩 → 𝒩 → ℝ) : Prop :=
-∀ (η : ℝ) (hr : 0 < η) (t : Tt T) (y : X 𝒩) (i : 𝒩), E t (y - η) i < E t y i
+∀ {η : ℝ} (hη : 0 < η) (t : Tt T) (y : X 𝒩) (i : 𝒩), E t y i < E t (y + η) i
+
+lemma mono_of_strict_mono_wrt_assets {E : Tt T → X 𝒩 → 𝒩 → ℝ} :
+  strict_mono_wrt_assets E → mono_wrt_assets E :=
+begin
+  intros h η hη t y i,
+  cases lt_or_eq_of_le hη with hlt he,
+  { apply le_of_lt,
+    apply h hlt, },
+  { apply le_of_eq,
+    congr,
+    rw ← he,
+    symmetry,
+    apply add_zero, },
+end
 
 def E_star (ℰ : ∀ (t : Tt T), X 𝒩 → (𝒩 → Tτ t → ℝ) → 𝒩 → ℝ) : debt_fn 𝒩 T → Tt T → X 𝒩 → 𝒩 → ℝ :=
 fun υ t y, ℰ t y (υ t y)
@@ -29,7 +42,8 @@ instance : has_coe_to_fun (equity_function 𝒩 T) :=
 { F := fun _, ∀ (t : Tt T), X 𝒩 → (𝒩 → Tτ t → ℝ) → 𝒩 → ℝ,
   coe := equity_function.ℰ }
 
-variable (ℰ : equity_function 𝒩 T)
+variables (ℋ : well_behaved_soln 𝒩 T) (ℰ : equity_function 𝒩 T)
+
 
 def v_ {A : finset 𝒩} (ψ : ∀ B < A, Tt T → X 𝒩 → 𝒫 B) : ∀ B < A, debt_fn 𝒩 T :=
 finset.strong_induction (fun B υ hB, v_mk ℋ (ψ B hB) (fun C hC, υ C hC (trans hC hB)))
@@ -92,6 +106,26 @@ noncomputable instance (A : finset 𝒩) (t : Tt T) (y : X 𝒩) : decidable_rel
 by { delta r', apply_instance, }
 
 variables {ℋ} {ℰ}
+
+lemma U_empty_eq_univ (t : Tt T) : U ℋ ℰ ∅ t = set.univ :=
+begin
+  apply set.eq_univ_of_forall,
+  intro y,
+  apply finset.empty_subset,
+end
+
+lemma ssubsets_nonempty_of_not_mem_U {A : finset 𝒩} {t : Tt T} {y : X 𝒩} :
+  y ∉ U ℋ ℰ A t → A.ssubsets.nonempty :=
+begin
+  intro hy,
+  use ∅,
+  apply finset.empty_mem_ssubsets,
+  rw finset.nonempty_iff_ne_empty,
+  intro he,
+  apply hy,
+  rw [he, U_empty_eq_univ],
+  apply set.mem_univ,
+end
 
 lemma hr2 {A : finset 𝒩} {t : Tt T} {y : X 𝒩} (B C D : 𝒫 A) :
   r ℋ ℰ t y D B → r ℋ ℰ t y D C → r ℋ ℰ t y D (B ⊔ C) :=

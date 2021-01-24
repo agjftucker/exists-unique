@@ -7,18 +7,19 @@ def Tt (T : with_top ℝ) : set ℝ := {t : ℝ | 0 ≤ t ∧ (t : with_top ℝ)
 def Tτ {T : with_top ℝ} (t : Tt T) : set ℝ := {τ : ℝ | t.1 < τ ∧ (τ : with_top ℝ) ≤ T}
 
 def X (𝒩 : Type) := 𝒩 → ℝ
-instance (𝒩 : Type) : has_coe ℝ (X 𝒩) := ⟨fun r i, r⟩
 
 def debt_fn (𝒩 : Type) (T : with_top ℝ) := ∀ (t : Tt T), X 𝒩 → 𝒩 → Tτ t → ℝ
 
-variables {𝒩 : Type} [decidable_eq 𝒩] [inner_product_space ℝ (X 𝒩)]
-variable {T : with_top ℝ}
+variables {𝒩 : Type} [decidable_eq 𝒩] {T : with_top ℝ}
+
+instance : has_coe ℝ (X 𝒩) := ⟨fun r i, r⟩
+instance : has_subset (Tt T → set (X 𝒩)) := ⟨fun V₁ V₂, (∀ t, V₁ t ⊆ V₂ t)⟩
+
+instance : add_comm_group (X 𝒩) := pi.add_comm_group
+noncomputable instance : topological_space (X 𝒩) := Pi.topological_space
 
 instance : has_zero (debt_fn 𝒩 T) := pi.has_zero
-instance : partial_order (debt_fn 𝒩 T) := pi.partial_order
-
-instance : has_subset (Tt T → set (X 𝒩)) :=
-{ subset := fun V₁ V₂, (∀ t, V₁ t ⊆ V₂ t) }
+noncomputable instance : semilattice_sup (debt_fn 𝒩 T) := pi.semilattice_sup
 
 def continuous_wrt_assets {α : Tt T → Type*} [∀ t, topological_space (α t)]
   (v : ∀ (t : Tt T), X 𝒩 → α t) : Prop :=
