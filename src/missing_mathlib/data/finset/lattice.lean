@@ -11,7 +11,7 @@ variables [semilattice_sup_bot α]
 
 variables {s s₁ s₂ : finset β} {f : β → α}
 
-@[simp] lemma sup_cons {b : β} (h : b ∉ s) : (cons b s h : finset β).sup f = f b ⊔ s.sup f :=
+@[simp] lemma sup_cons {b : β} (h : b ∉ s) : (cons b s h).sup f = f b ⊔ s.sup f :=
 fold_cons h
 
 end sup
@@ -45,6 +45,46 @@ begin
   intros b hb,
   rw with_bot.some_le_some,
   exact H2 b hb,
+end
+
+variables {s : finset β} (H : s.nonempty) (f : β → α)
+
+@[simp] lemma coe_sup'_eq_sup : ((s.sup' H f : α) : with_bot α) = s.sup (coe ∘ f) :=
+by { rw [sup', ←with_bot.some_eq_coe, option.some_get], refl }
+
+lemma sup'_insert [decidable_eq β] {b : β} (h : (insert b s).nonempty) :
+  (insert b s).sup' h f = f b ⊔ s.sup' H f :=
+by { rw ←with_bot.coe_eq_coe, simp }
+
+end sup'
+
+section sup
+variables {C : β → Type*} [∀ (b : β), semilattice_sup_bot (C b)]
+
+protected lemma sup_apply (s : finset α) (f : α → ∀ (b : β), C b) (b : β) :
+  s.sup f b = s.sup (fun a, f a b) :=
+begin
+  induction s using finset.induction' with c s hc ih,
+  { refl, },
+  { rw [sup_cons, sup_cons, sup_apply, ih], },
+end
+
+end sup
+
+section sup'
+variables [decidable_eq α] {C : β → Type*} [∀ (b : β), semilattice_sup (C b)]
+
+lemma sup'_apply {s : finset α} (h : s.nonempty) (f : α → ∀ (b : β), C b) (b : β) :
+  s.sup' h f b = s.sup' h (fun a, f a b) :=
+begin
+  induction s using finset.induction_on with c s hc ih,
+  { exfalso,
+    exact not_nonempty_empty h, },
+  { cases dec_em (s = ∅) with he hne,
+    { subst he,
+      refl, },
+    { repeat { rw sup'_insert (nonempty_of_ne_empty hne), },
+      rw [sup_apply, ih], }, },
 end
 
 end sup'
