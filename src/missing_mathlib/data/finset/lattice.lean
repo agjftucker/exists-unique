@@ -1,5 +1,6 @@
 import data.finset.lattice
 import missing_mathlib.data.finset.fold
+import missing_mathlib.order.bounded_lattice
 
 variables {α β γ : Type*}
 
