@@ -53,6 +53,10 @@ variables {s : finset β} (H : s.nonempty) (f : β → α)
 @[simp] lemma coe_sup'_eq_sup : ((s.sup' H f : α) : with_bot α) = s.sup (coe ∘ f) :=
 by { rw [sup', ←with_bot.some_eq_coe, option.some_get], refl }
 
+lemma sup'_cons {b : β} (hb : b ∉ s) :
+  (cons b s hb).sup' (nonempty_cons hb) f = f b ⊔ s.sup' H f :=
+by { rw ←with_bot.coe_eq_coe, simp }
+
 lemma sup'_insert [decidable_eq β] {b : β} (h : (insert b s).nonempty) :
   (insert b s).sup' h f = f b ⊔ s.sup' H f :=
 by { rw ←with_bot.coe_eq_coe, simp }
@@ -120,15 +124,12 @@ lemma of_sup'_of_forall {s : finset β} (hne : s.nonempty) (f : β → α) {p : 
 begin
   cases hne with k hk,
   cases sup_of_mem f hk with m hm,
-  have : s.sup' ⟨k, hk⟩ f = m,
-  { dunfold sup',
-    apply option.some_injective,
-    rwa option.some_get, },
-  rw this,
+  rw show s.sup' ⟨k, hk⟩ f = m,
+  { rwa [←with_bot.coe_eq_coe, coe_sup'_eq_sup], },
   let p' := @option.rec α (fun _, Prop) true p,
   change p' (some m),
   rw ←hm,
-  refine of_sup_of_forall (some ∘ f) trivial _ hs,
+  refine of_sup_of_forall (coe ∘ f) trivial _ hs,
   intros a₁ a₂ h₁ h₂,
   cases a₁,
   { rwa [with_bot.none_eq_bot, bot_sup_eq], },
