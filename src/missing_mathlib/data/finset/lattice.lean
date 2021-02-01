@@ -38,7 +38,7 @@ option.get $ let ⟨k, hk⟩ := H in option.is_some_iff_exists.2 (sup_of_mem f h
 theorem le_sup' {s : finset β} (f : β → α) {b : β} (H2 : b ∈ s) : f b ≤ s.sup' ⟨b, H2⟩ f :=
 le_sup_of_mem f H2 $ option.get_mem _
 
-theorem sup'_le {s : finset β} (H : s.nonempty) (f : β → α) (a : α) (H2 : ∀ b ∈ s, f b ≤ a) :
+theorem sup'_le {s : finset β} (H : s.nonempty) (f : β → α) {a : α} (H2 : ∀ b ∈ s, f b ≤ a) :
   s.sup' H f ≤ a :=
 begin
   rw [←with_bot.some_le_some, sup', option.some_get],

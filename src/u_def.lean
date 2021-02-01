@@ -86,10 +86,6 @@ def U : finset 𝒩 → Tt T → set (X 𝒩) := V (φ ℋ ℰ)
 
 noncomputable def u : finset 𝒩 → debt_fn 𝒩 T := v ℋ (φ ℋ ℰ)
 
-lemma u_eq_ite (A : finset 𝒩) (t : Tt T) : u ℋ ℰ A t =
-  fun y i, ite (i ∈ A) (ℋ (fun s x (h : x ∉ U ℋ ℰ A s), u ℋ ℰ (φ ℋ ℰ A s x) s x i) t y) 0 :=
-by { delta u v, rw finset.strong_induction_eq, refl, }
-
 def r (t : Tt T) (y : X 𝒩) (C B : finset 𝒩) : Prop :=
 ∀ i ∈ B, 0 < E_star ℰ (u ℋ ℰ C) t y i
 

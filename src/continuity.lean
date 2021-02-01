@@ -25,13 +25,14 @@ lemma continuous_of_continuous_on_compl {A : finset 𝒩} :
   (∀ t, continuous_on (u ℋ ℰ A t) (U ℋ ℰ A t)ᶜ) → continuous_wrt_assets (u ℋ ℰ A) :=
 begin
   intros h t,
-  rw [u_eq_ite, continuous_iff_continuous_forall],
+  rw show u ℋ ℰ A t = fun y i, ite _ _ _,
+  { funext y i, rw u_eq_ite, },
+  rw continuous_iff_continuous_forall,
   intro i,
   split_ifs,
   { revert t,
     apply ℋ.continuity_preserving,
     intro t,
-    simp_rw ←u_match,
     specialize h t,
     rw [continuous_on_iff_continuous_restrict, continuous_iff_continuous_forall] at h,
     exact h i, },
