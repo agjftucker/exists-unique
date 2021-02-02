@@ -5,10 +5,10 @@ local prefix `𝒫`:100 := fun {α : Type} (s : finset α), {t // t ≤ s}
 variables {𝒩 : Type} [decidable_eq 𝒩] {T : with_top ℝ}
 
 def mono_wrt_assets {β : Tt T → Type*} [∀ t, has_le (β t)] (f : ∀ (t : Tt T), X 𝒩 → β t) : Prop :=
-∀ {η : ℝ} (hη : 0 ≤ η) (t : Tt T) (y : X 𝒩), f t y ≤ f t (y + η)
+∀ (η : ℝ) (hη : 0 ≤ η) (t : Tt T) (y : X 𝒩), f t y ≤ f t (y + η)
 
 def strict_mono_wrt_assets (E : Tt T → X 𝒩 → 𝒩 → ℝ) : Prop :=
-∀ {η : ℝ} (hη : 0 < η) (t : Tt T) (y : X 𝒩) (i : 𝒩), E t y i < E t (y + η) i
+∀ (η : ℝ) (hη : 0 < η) (t : Tt T) (y : X 𝒩) (i : 𝒩), E t y i < E t (y + η) i
 
 lemma mono_of_strict_mono_wrt_assets {E : Tt T → X 𝒩 → 𝒩 → ℝ} :
   strict_mono_wrt_assets E → mono_wrt_assets E :=
@@ -16,7 +16,7 @@ begin
   intros h η hη t y i,
   cases lt_or_eq_of_le hη with hlt he,
   { apply le_of_lt,
-    apply h hlt, },
+    apply h η hlt, },
   { apply le_of_eq,
     congr,
     rw ← he,
