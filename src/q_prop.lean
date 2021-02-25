@@ -3,73 +3,85 @@ import q_def
 local prefix `𝒫`:100 := λ {α : Type} (s : finset α), {t // t ≤ s}
 
 section
-variables {α : Type*} [bounded_join_semilattice α] {r : α → α → Prop}
+variables {α : Type*} [semilattice_sup_bot α]
 
-variable hr₁ (b c d : α) : c < ⊤ → d ≤ c → r d b → r c b
-variable hr₂ (b c d : α) : r d b → r d c → r d (b ⊔ c)
+class tuckerian {α β} [preorder α] [semilattice_sup_bot β] (r : α → β → Prop) : Prop :=
+(bottom : ∀ (b : α), r b ⊥)
+(sup : ∀ (b c : β) (d : α), r d b → r d c → r d (b ⊔ c))
+(downward_closed : ∀ (c d : α), d ≤ c → ∀ (b : β), r d b → r c b)
 
-include hr₁
+variables {r : α → α → Prop} [ht : tuckerian r]
+include ht
 
-lemma hr₄ {b : α} : ⊥ < b → b < ⊤ → q r b → r b b :=
+lemma r_self_of_q {b : α} : q r b → r b b :=
 begin
-  intros hb ht hq,
-  rcases hq with _ | ⟨_, c, hlt, hr, hq⟩,
-  { exfalso,
-    exact not_lt_bot hb, },
-  { exact hr₁ _ _ _ ht (le_of_lt hlt) hr, },
+  intro hqb,
+  cases hqb with _ c hlt hr hqc,
+  { exact tuckerian.bottom ⊥, },
+  { exact tuckerian.downward_closed b c (le_of_lt hlt) b hr, },
 end
 
-include hr₂
-
-lemma hr₅ {b c d : α} : b ⊔ d < ⊤ → r d c → q r b → r (b ⊔ d) (b ⊔ c) :=
+lemma r_joins_of_q {b c d : α} : r d c → q r b → r (b ⊔ d) (b ⊔ c) :=
 begin
-  intros ht hr hq,
-  cases lt_or_eq_of_le (order_bot.bot_le b) with hb hb,
-  { apply hr₂,
-    { apply hr₁ _ _ _ ht le_sup_left,
-      refine hr₄ hr₁ hb _ hq,
-      exact lt_of_le_of_lt le_sup_left ht, },
-    { exact hr₁ _ _ _ ht le_sup_right hr, }, },
-  { rw [← hb, bot_sup_eq, bot_sup_eq],
-    exact hr, },
+  intros hr hq,
+  apply tuckerian.sup,
+  { exact tuckerian.downward_closed (b ⊔ d) b le_sup_left b (r_self_of_q hq), },
+  { exact tuckerian.downward_closed (b ⊔ d) d le_sup_right c hr, },
 end
 
-lemma q_of_sup_of_foreach : ∀ b c, q r b → q r c → q r (b ⊔ c) :=
+lemma q_sup_of_foreach {b c : α} : q r b → q r c → q r (b ⊔ c) :=
 begin
-  rintros b c hb hc,
-  apply hc.rec_on,
-  { convert hb,
-    exact sup_bot_eq, },
-  { intros c d hd hr hq,
-    cases lt_or_eq_of_le (sup_le_sup_left (le_of_lt hd) b) with hlt he,
-    { apply q.succ hlt,
-      exact hr₅ hr₁ hr₂ (lt_of_lt_of_le hlt le_top) hr hb, },
-    { intro h,
-      rwa ←he, }, },
+  intros hb hc,
+  induction hc with d e hed hr hq hq',
+  { rwa sup_bot_eq, },
+  { cases lt_or_eq_of_le (sup_le_sup_left (le_of_lt hed) b) with hlt he,
+    { exact q.succ hlt (r_joins_of_q hr hb) hq', },
+    { rwa he at hq', }, },
 end
 
-lemma q_of_sup_of_forall (s : finset α) : (∀ b ∈ s, q r b) → q r (s.sup id) :=
+lemma q_sup_of_forall (s : finset α) : (∀ b ∈ s, q r b) → q r (s.sup id) :=
 begin
   apply finset.of_sup_of_forall,
   apply q.base,
-  apply q_of_sup_of_foreach hr₁ hr₂,
+  apply q_sup_of_foreach,
+end
+
+lemma exists_ge_term_of_q {a : α} :
+  q r a → ∀ c < a, q r c → ∃ b, c ≤ b ∧ b < a ∧ q r b ∧ r b a :=
+begin
+  suffices : ∀ d ≤ a, q r d → ∀ c < a, q r c → ∃ b, c ≤ b ∧ b < a ∧ q r b ∧ r b (c ⊔ d),
+  { intros hqa c hca hqc,
+    specialize this a (le_refl a) hqa c hca hqc,
+    rwa sup_of_le_right (le_of_lt hca) at this, },
+  intros d hle hqd c hca hqc,
+  induction hqd with e f hfe hr hqf h₄ h₅,
+  { rw sup_bot_eq,
+    use [c, le_refl c, hca, hqc, r_self_of_q hqc], },
+  { have hfa := le_trans (le_of_lt hfe) hle,
+    cases lt_or_eq_of_le (sup_le (le_of_lt hca) hfa) with hlt he,
+    { use [c ⊔ f, le_sup_left, hlt, q_sup_of_foreach hqc hqf],
+      apply r_joins_of_q hr hqc, },
+    { rcases h₄ hfa with ⟨b, hb₁, hb₂, hb₃, hb₄⟩,
+      use [b, hb₁, hb₂, hb₃],
+      suffices : c ⊔ f = c ⊔ e,
+      { rwa this at hb₄, },
+      apply le_antisymm,
+      { exact sup_le_sup_left (le_of_lt hfe) c, },
+      { rw he,
+        exact sup_le (le_of_lt hca) hle, }, }, },
 end
 
 end
 
 namespace si
+variables {β : Type} [decidable_eq β] {A : finset β}
 
-variables {β : Type} [decidable_eq β]
-variables {A : finset β} {r : 𝒫 A → 𝒫 A → Prop} [decidable_rel r]
-
-variable hr₁ (B C D : 𝒫 A) : C < ⊤ → D ≤ C → r D B → r C B
-variable hr₂ (B C D : 𝒫 A) : r D B → r D C → r D (B ⊔ C)
-
-include hr₁ hr₂
+variables {r : 𝒫 A → 𝒫 A → Prop} [decidable_rel r] [ht : tuckerian r]
+include ht
 
 lemma q_φ : q r (si.φ r) :=
 begin
-  apply q_of_sup_of_forall hr₁ hr₂,
+  apply q_sup_of_forall,
   intros B hB,
   rw finset.mem_filter at hB,
   exact hB.2,

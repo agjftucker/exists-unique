@@ -123,15 +123,6 @@ begin
   apply set.mem_univ,
 end
 
-lemma hr2 {A : finset 𝒩} {t : Tt T} {y : X 𝒩} (B C D : 𝒫 A) :
-  r ℋ ℰ t y D B → r ℋ ℰ t y D C → r ℋ ℰ t y D (B ⊔ C) :=
-begin
-  intros rDB rDC i hi,
-  cases finset.mem_union.mp hi with hB hC,
-  { exact rDB i hB, },
-  { exact rDC i hC, },
-end
-
 lemma r_iff' {t : Tt T} {y : X 𝒩} (A : finset 𝒩) :
   ∀ (B C : 𝒫 A), C < B → (r ℋ ℰ t y ↑C ↑B ↔ r' ℋ ℰ A t y C B) :=
 fun B C hlt, by refl
