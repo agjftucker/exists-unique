@@ -53,6 +53,19 @@ end
 lemma exists_soln : survivors_fn ℋ ℰ (φ ℋ ℰ) :=
 ⟨φ_idempotent, φ_maximal, φ_consistent⟩
 
+theorem φ_greatest (A : finset 𝒩) (t : Tt T) (y : X 𝒩) :
+  ∀ B ≤ A, y ∈ U ℋ ℰ B t → B ≤ φ ℋ ℰ A t y :=
+begin
+  intros B hB hU,
+  apply le_trans hU,
+  apply φ_mono hB,
+end
+
+noncomputable instance (A : finset 𝒩) (t : Tt T) (y : X 𝒩) : order_top {B : 𝒫 A | y ∈ U ℋ ℰ B t} :=
+{ top := ⟨φ ℋ ℰ A t y, φ_idempotent A t y⟩,
+  le_top := fun ⟨B, hB⟩, φ_greatest A t y B B.prop hB,
+  .. subtype.partial_order _ }
+
 lemma mem_Vψ_iff_q {ψ : ∀ A, Tt T → X 𝒩 → 𝒫 A} {A : finset 𝒩} (ih : ∀ B < A, ψ B = φ ℋ ℰ B)
   {B : finset 𝒩} (hB : B < A) : ∀ t y, y ∈ V ψ B t ↔ q (r ℋ ℰ t y) B :=
 begin
@@ -62,8 +75,11 @@ begin
   rw ih B hB,
 end
 
-lemma U_subset_Vψ {ψ : ∀ A, Tt T → X 𝒩 → 𝒫 A} (hψ : survivors_fn ℋ ℰ ψ)
-  {A : finset 𝒩} (ih : ∀ B < A, ψ B = φ ℋ ℰ B) : U ℋ ℰ A ⊆ V ψ A :=
+variables {ψ : ∀ (A : finset 𝒩), Tt T → X 𝒩 → 𝒫 A} (hψ : survivors_fn ℋ ℰ ψ)
+variables {A : finset 𝒩} (ih : ∀ B < A, ψ B = φ ℋ ℰ B)
+include hψ ih
+
+lemma U_subset_Vψ : U ℋ ℰ A ⊆ V ψ A :=
 begin
   intros t y hA,
   rw mem_U_iff_q at hA,
@@ -82,4 +98,21 @@ begin
     delta E_star,
     rw [v_match, v_eq_of_ψ_eq_on_ssubsets A ih _ ltA, eqB],
     exact hB₄, },
+end
+
+lemma ψ_eq_φ_of_not_mem_Vψ {t : Tt T} {y : X 𝒩} (hnV : y ∉ V ψ A t) : ψ A t y = φ ℋ ℰ A t y :=
+begin
+  have hUψ : y ∈ U ℋ ℰ (ψ A t y) t,
+  { delta U V,
+    rw ← ih _ ⟨(ψ A t y).prop, hnV⟩,
+    apply hψ.idempotent, },
+  suffices : (⟨ψ A t y, hUψ⟩ : {B : 𝒫 A | y ∈ U ℋ ℰ B t}) = ⊤,
+  { rwa subtype.ext_iff at this, },
+  apply unique_maximal_of_greatest,
+  rintros ⟨B, hUB⟩ hψB,
+  apply hψ.maximal A B t y hψB B.prop,
+  refine U_subset_Vψ hψ _ t hUB,
+  intros C hC,
+  apply ih,
+  exact lt_of_lt_of_le hC B.prop,
 end
