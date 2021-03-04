@@ -56,7 +56,7 @@ begin
     apply continuous_on_empty, },
   { rw continuous_on_congr (u_eq_on_compl hne),
     apply continuous.continuous_on,
-    apply of_sup'_of_forall ⟨∅, empty_mem_ssubsets hne⟩ (u ℋ ℰ) join_continuous,
+    apply of_sup'_of_forall ⟨∅, empty_mem_ssubsets hne⟩ join_continuous,
     intros B hB,
     apply ih,
     rwa mem_ssubsets_iff at hB, },
