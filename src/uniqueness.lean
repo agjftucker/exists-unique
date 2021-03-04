@@ -1,4 +1,3 @@
-import missing_mathlib.topology.algebra.ordered
 import existence continuity monotonicity
 
 local prefix `𝒫`:100 := fun {α : Type} (s : finset α), {t // t ≤ s}

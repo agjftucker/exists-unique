@@ -100,8 +100,9 @@ begin
     exact hB₄, },
 end
 
-lemma ψ_eq_φ_of_not_mem_Vψ {t : Tt T} {y : X 𝒩} (hnV : y ∉ V ψ A t) : ψ A t y = φ ℋ ℰ A t y :=
+lemma ψ_eq_φ_on_compl_Vψ {t : Tt T} : (V ψ A t)ᶜ.eq_on (ψ A t) (φ ℋ ℰ A t) :=
 begin
+  intros y hnV,
   have hUψ : y ∈ U ℋ ℰ (ψ A t y) t,
   { delta U V,
     rw ← ih _ ⟨(ψ A t y).prop, hnV⟩,
@@ -115,4 +116,12 @@ begin
   intros C hC,
   apply ih,
   exact lt_of_lt_of_le hC B.prop,
+end
+
+lemma vψ_eq_u_on_compl_Vψ {t : Tt T} : (V ψ A t)ᶜ.eq_on (v ℋ ψ A t) (u ℋ ℰ A t) :=
+begin
+  intros y hnV,
+  rw [v_match, u_match, ← ψ_eq_φ_on_compl_Vψ hψ ih hnV],
+  rw v_eq_of_ψ_eq_on_ssubsets _ ih _ ⟨(ψ A t y).prop, hnV⟩,
+  refl,
 end
