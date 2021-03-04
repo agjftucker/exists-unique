@@ -9,12 +9,7 @@ lemma u_match : ∀ A t y, u ℋ ℰ A t y = u ℋ ℰ (φ ℋ ℰ A t y) t y :=
 
 lemma u_eq_ite (A : finset 𝒩) (t : Tt T) (y : X 𝒩) (i : 𝒩) : u ℋ ℰ A t y i =
   ite (i ∈ A) (ℋ (fun s x (h : x ∉ U ℋ ℰ A s), u ℋ ℰ A s x i) t y) 0 :=
-begin
-  conv_lhs
-  { rw [u, v, finset.strong_induction_eq],
-    change ite (i ∈ A) (ℋ (fun s x (h : x ∉ U ℋ ℰ A s), u ℋ ℰ (φ ℋ ℰ A s x) s x i) t y) 0, },
-  simp_rw ←u_match,
-end
+v_eq_ite A t y i
 
 namespace φp
 

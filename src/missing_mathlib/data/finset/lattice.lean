@@ -83,7 +83,7 @@ begin
   exact H2 b hb,
 end
 
-variables {s : finset β} (H : s.nonempty) (f : β → α)
+variables {s : finset β} (H : s.nonempty) {f : β → α}
 
 lemma sup'_cons {b : β} (hb : b ∉ s) :
   (cons b s hb).sup' (nonempty_cons hb) f = f b ⊔ s.sup' H f :=
@@ -92,6 +92,24 @@ by { rw ←with_bot.coe_eq_coe, simp }
 lemma sup'_insert [decidable_eq β] {b : β} (h : (insert b s).nonempty) :
   (insert b s).sup' h f = f b ⊔ s.sup' H f :=
 by { rw ←with_bot.coe_eq_coe, simp }
+
+lemma of_sup'_of_forall {p : α → Prop}
+  (hp : ∀ (a₁ a₂ : α), p a₁ → p a₂ → p (a₁ ⊔ a₂)) (hs : ∀ b ∈ s, p (f b)) : p (s.sup' H f) :=
+begin
+  cases H with b hb,
+  cases sup_of_mem f hb with a ha,
+  rw show s.sup' ⟨b, hb⟩ f = a,
+  { rwa [←with_bot.coe_eq_coe, coe_sup'_eq_sup_coe], },
+  change @option.rec α (fun _, Prop) true p ↑a,
+  rw ←ha,
+  refine of_sup_of_forall trivial _ hs,
+  intros a₁ a₂ h₁ h₂,
+  cases a₁,
+  { rwa [with_bot.none_eq_bot, bot_sup_eq], },
+  cases a₂,
+  { rwa [with_bot.none_eq_bot, sup_bot_eq], },
+  exact hp a₁ a₂ h₁ h₂,
+end
 
 end sup'
 
@@ -112,6 +130,12 @@ def inf' (s : finset β) (H : s.nonempty) (f : β → α) : α :=
 @[simp] lemma coe_inf'_eq_inf_coe {s : finset β} (H : s.nonempty) (f : β → α) :
   ((s.inf' H f : α) : with_top α) = s.inf (coe ∘ f) :=
 @coe_sup'_eq_sup_coe (order_dual α) _ _ _ H f
+
+variables {s : finset β} (H : s.nonempty) {f : β → α}
+
+lemma of_inf'_of_forall {p : α → Prop}
+  (hp : ∀ (a₁ a₂ : α), p a₁ → p a₂ → p (a₁ ⊓ a₂)) (hs : ∀ b ∈ s, p (f b)) : p (s.inf' H f) :=
+@of_sup'_of_forall (order_dual α) _ _ _ H _ _ hp hs
 
 end inf'
 
@@ -138,61 +162,27 @@ protected lemma inf_apply (s : finset α) (f : α → Π (b : β), C b) (b : β)
 end inf
 
 section sup'
-variables [decidable_eq α] {C : β → Type*} [Π (b : β), semilattice_sup (C b)]
+variables {C : β → Type*} [Π (b : β), semilattice_sup (C b)]
 
 lemma sup'_apply {s : finset α} (h : s.nonempty) (f : α → Π (b : β), C b) (b : β) :
   s.sup' h f b = s.sup' h (fun a, f a b) :=
 begin
-  induction s using finset.induction_on with c s hc ih,
+  induction s using finset.induction' with c s hc ih,
   { exfalso,
     exact not_nonempty_empty h, },
-  { cases dec_em (s = ∅) with he hne,
-    { subst he,
-      refl, },
-    { repeat { rw sup'_insert (nonempty_of_ne_empty hne), },
-      rw [sup_apply, ih], }, },
+  { rcases s.eq_empty_or_nonempty with rfl | hne,
+    { refl, },
+    { rw [sup'_cons hne, sup'_cons hne, sup_apply, ih], }, },
 end
 
 end sup'
 
 section inf'
-variables [decidable_eq α] {C : β → Type*} [Π (b : β), semilattice_inf (C b)]
+variables {C : β → Type*} [Π (b : β), semilattice_inf (C b)]
 
 lemma inf'_apply {s : finset α} (h : s.nonempty) (f : α → Π (b : β), C b) (b : β) :
   s.inf' h f b = s.inf' h (fun a, f a b) :=
-@sup'_apply _ _ _ (fun b, order_dual (C b)) _ _ _ _ _
-
-end inf'
-
-section sup'
-variable [semilattice_sup α]
-
-lemma of_sup'_of_forall {s : finset β} (hne : s.nonempty) {f : β → α} {p : α → Prop}
-  (hp : ∀ (a₁ a₂ : α), p a₁ → p a₂ → p (a₁ ⊔ a₂)) (hs : ∀ b ∈ s, p (f b)) : p (s.sup' hne f) :=
-begin
-  cases hne with k hk,
-  cases sup_of_mem f hk with m hm,
-  rw show s.sup' ⟨k, hk⟩ f = m,
-  { rwa [←with_bot.coe_eq_coe, coe_sup'_eq_sup_coe], },
-  change @option.rec α (fun _, Prop) true p ↑m,
-  rw ←hm,
-  refine of_sup_of_forall trivial _ hs,
-  intros a₁ a₂ h₁ h₂,
-  cases a₁,
-  { rwa [with_bot.none_eq_bot, bot_sup_eq], },
-  cases a₂,
-  { rwa [with_bot.none_eq_bot, sup_bot_eq], },
-  exact hp a₁ a₂ h₁ h₂,
-end
-
-end sup'
-
-section inf'
-variable [semilattice_inf α]
-
-lemma of_inf'_of_forall {s : finset β} (hne : s.nonempty) {f : β → α} {p : α → Prop}
-  (hp : ∀ (a₁ a₂ : α), p a₁ → p a₂ → p (a₁ ⊓ a₂)) (hs : ∀ b ∈ s, p (f b)) : p (s.inf' hne f) :=
-@of_sup'_of_forall (order_dual α) _ _ _ _ _ _ hp hs
+@sup'_apply _ _ (fun b, order_dual (C b)) _ _ _ _ _
 
 end inf'
 

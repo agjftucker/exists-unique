@@ -1,6 +1,8 @@
 import missing_mathlib.topology.constructions
 import u_prop
 
+local prefix `𝒫`:100 := fun {α : Type} (s : finset α), {t // t ≤ s}
+
 variables {𝒩 : Type} [decidable_eq 𝒩] {T : with_top ℝ}
 variables {ℋ : well_behaved_soln 𝒩 T} {ℰ : equity_function 𝒩 T}
 
@@ -21,12 +23,15 @@ begin
     assumption, },
 end
 
-lemma continuous_of_continuous_on_compl {A : finset 𝒩} :
-  (∀ t, continuous_on (u ℋ ℰ A t) (U ℋ ℰ A t)ᶜ) → continuous_wrt_assets (u ℋ ℰ A) :=
+section v
+variable {ψ : ∀ (B : finset 𝒩), Tt T → X 𝒩 → 𝒫 B}
+
+lemma v_continuous_of_continuous_on_compl {A : finset 𝒩} :
+  (∀ t, continuous_on (v ℋ ψ A t) (V ψ A t)ᶜ) → continuous_wrt_assets (v ℋ ψ A) :=
 begin
   intros h t,
-  rw show u ℋ ℰ A t = fun y i, ite _ _ _,
-  { funext y i, rw u_eq_ite, },
+  rw show v ℋ ψ A t = fun y i, ite _ _ _,
+  { funext y i, rw v_eq_ite, },
   rw continuous_iff_continuous_forall,
   intro i,
   split_ifs,
@@ -39,7 +44,14 @@ begin
   { exact continuous_const, },
 end
 
+end v
+
+section u
 open finset
+
+lemma u_continuous_of_continuous_on_compl {A : finset 𝒩} :
+  (∀ t, continuous_on (u ℋ ℰ A t) (U ℋ ℰ A t)ᶜ) → continuous_wrt_assets (u ℋ ℰ A) :=
+v_continuous_of_continuous_on_compl
 
 lemma u_eq_on_compl {A : finset 𝒩} (hA : A.nonempty) {t : Tt T} :
   (U ℋ ℰ A t)ᶜ.eq_on (u ℋ ℰ A t) (A.ssubsets.sup' ⟨∅, empty_mem_ssubsets hA⟩ (u ℋ ℰ) t) :=
@@ -49,7 +61,7 @@ lemma uA_continuous_of_uB_continuous (A : finset 𝒩) :
   (∀ B < A, continuous_wrt_assets (u ℋ ℰ B)) → continuous_wrt_assets (u ℋ ℰ A) :=
 begin
   intro ih,
-  apply continuous_of_continuous_on_compl,
+  apply u_continuous_of_continuous_on_compl,
   intro t,
   cases A.eq_empty_or_nonempty with he hne,
   { rw [he, U_empty_eq_univ, set.compl_univ],
@@ -62,5 +74,7 @@ begin
     rwa mem_ssubsets_iff at hB, },
 end
 
-lemma u_continuous_wrt_assets : ∀ (A : finset 𝒩), continuous_wrt_assets (u ℋ ℰ A) :=
+lemma u_continuous_wrt_assets : ∀ A, continuous_wrt_assets (u ℋ ℰ A) :=
 finset.strong_induction uA_continuous_of_uB_continuous
+
+end u

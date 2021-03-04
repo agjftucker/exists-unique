@@ -5,7 +5,7 @@ local prefix `𝒫`:100 := fun {α : Type} (s : finset α), {t // t ≤ s}
 variables {𝒩 : Type} [decidable_eq 𝒩] {T : with_top ℝ}
 variables {ℋ : well_behaved_soln 𝒩 T}
 
-{ψ ψ' : ∀ (B : finset 𝒩), Tt T → X 𝒩 → 𝒫 B}
+variables {ψ ψ' : ∀ (B : finset 𝒩), Tt T → X 𝒩 → 𝒫 B}
 
 lemma v_eq_of_ψ_eq_on_ssubsets (A : finset 𝒩) :
   (∀ B < A, ψ B = ψ' B) → (∀ B < A, v ℋ ψ B = v ℋ ψ' B) :=
@@ -37,6 +37,15 @@ begin
     { rw [v, finset.strong_induction_eq, ←v],
       change ite (i ∈ ↑(ψ A t y)) (ℋ (fun s x _, v ℋ ψ (ψ (ψ A t y) s x) s x i) t y) 0,
       rw if_neg (fun h, hi ((ψ A t y).prop h)), }, },
+end
+
+lemma v_eq_ite (A : finset 𝒩) (t : Tt T) (y : X 𝒩) (i : 𝒩) : v ℋ ψ A t y i =
+  ite (i ∈ A) (ℋ (fun s x (h : x ∉ V ψ A s), v ℋ ψ A s x i) t y) 0 :=
+begin
+  conv_lhs
+  { rw [v, finset.strong_induction_eq],
+    change ite (i ∈ A) (ℋ (fun s x (h : x ∉ V ψ A s), v ℋ ψ (ψ A s x) s x i) t y) 0, },
+  simp_rw ←v_match,
 end
 
 lemma v_nonneg (A : finset 𝒩) : 0 ≤ v ℋ ψ A :=
