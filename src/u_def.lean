@@ -33,7 +33,7 @@ variables (𝒩) (T)
 structure equity_function :=
 (ℰ : ∀ (t : Tt T), X 𝒩 → (𝒩 → Tτ t → ℝ) → 𝒩 → ℝ)
 (mono_wrt_debt_valuation {t : Tt T} {y : X 𝒩} {υ₁ υ₂ : 𝒩 → Tτ t → ℝ} : υ₁ ≤ υ₂ → ℰ t y υ₁ ≤ ℰ t y υ₂)
-(continuity_preserving (υ : debt_fn 𝒩 T) : ∀ t, continuous (υ t) → continuous (E_star ℰ υ t))
+(continuity_preserving {υ : debt_fn 𝒩 T} {t : Tt T} : continuous (υ t) → continuous (E_star ℰ υ t))
 (mono_preserving_wrt_assets {υ : debt_fn 𝒩 T} : mono_wrt_assets υ → strict_mono_wrt_assets (E_star ℰ υ))
 
 end
