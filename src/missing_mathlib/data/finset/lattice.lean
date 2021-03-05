@@ -96,19 +96,16 @@ by { rw ←with_bot.coe_eq_coe, simp }
 lemma of_sup'_of_forall {p : α → Prop}
   (hp : ∀ (a₁ a₂ : α), p a₁ → p a₂ → p (a₁ ⊔ a₂)) (hs : ∀ b ∈ s, p (f b)) : p (s.sup' H f) :=
 begin
-  cases H with b hb,
-  cases sup_of_mem f hb with a ha,
-  rw show s.sup' ⟨b, hb⟩ f = a,
-  { rwa [←with_bot.coe_eq_coe, coe_sup'_eq_sup_coe], },
-  change @option.rec α (fun _, Prop) true p ↑a,
-  rw ←ha,
+  let p' := @option.rec α (fun _, Prop) true p,
+  change p' ↑(s.sup' H f),
+  rw coe_sup'_eq_sup_coe,
   refine of_sup_of_forall trivial _ hs,
   intros a₁ a₂ h₁ h₂,
   cases a₁,
   { rwa [with_bot.none_eq_bot, bot_sup_eq], },
-  cases a₂,
-  { rwa [with_bot.none_eq_bot, sup_bot_eq], },
-  exact hp a₁ a₂ h₁ h₂,
+  { cases a₂,
+    exact h₁,
+    exact hp a₁ a₂ h₁ h₂, },
 end
 
 end sup'
@@ -157,7 +154,7 @@ variables {C : β → Type*} [Π (b : β), semilattice_inf_top (C b)]
 
 protected lemma inf_apply (s : finset α) (f : α → Π (b : β), C b) (b : β) :
   s.inf f b = s.inf (fun a, f a b) :=
-@finset.sup_apply _ _ (fun b, order_dual (C b)) _ _ _ _
+@finset.sup_apply _ _ (fun b, order_dual (C b)) _ s f b
 
 end inf
 
@@ -167,12 +164,17 @@ variables {C : β → Type*} [Π (b : β), semilattice_sup (C b)]
 lemma sup'_apply {s : finset α} (h : s.nonempty) (f : α → Π (b : β), C b) (b : β) :
   s.sup' h f b = s.sup' h (fun a, f a b) :=
 begin
-  induction s using finset.induction' with c s hc ih,
-  { exfalso,
-    exact not_nonempty_empty h, },
-  { rcases s.eq_empty_or_nonempty with rfl | hne,
-    { refl, },
-    { rw [sup'_cons hne, sup'_cons hne, sup_apply, ih], }, },
+  rw [← with_bot.coe_eq_coe, coe_sup'_eq_sup_coe],
+  let g := @option.rec (Π b, C b) (fun _, with_bot (C b)) ⊥ (fun f, ↑(f b)),
+  change g ↑(s.sup' h f) = s.sup (fun a, g ↑(f a)),
+  rw coe_sup'_eq_sup_coe,
+  refine comp_sup_eq_sup_comp g _ rfl,
+  intros f₁ f₂,
+  cases f₁,
+  { rw [with_bot.none_eq_bot, bot_sup_eq],
+    exact bot_sup_eq.symm, },
+  { cases f₂;
+    refl, },
 end
 
 end sup'
@@ -182,7 +184,7 @@ variables {C : β → Type*} [Π (b : β), semilattice_inf (C b)]
 
 lemma inf'_apply {s : finset α} (h : s.nonempty) (f : α → Π (b : β), C b) (b : β) :
   s.inf' h f b = s.inf' h (fun a, f a b) :=
-@sup'_apply _ _ (fun b, order_dual (C b)) _ _ _ _ _
+@sup'_apply _ _ (fun b, order_dual (C b)) _ _ h f b
 
 end inf'
 
