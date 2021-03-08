@@ -1,4 +1,5 @@
-import analysis.normed_space.inner_product
+import topology.instances.real
+import missing_mathlib.topology.algebra.group
 import missing_mathlib.data.finset.basic
 
 local prefix `𝒫`:100 := λ {α : Type} (s : finset α), {t // t ≤ s}
@@ -17,9 +18,10 @@ instance : has_subset (Tt T → set (X 𝒩)) := ⟨fun V₁ V₂, (∀ t, V₁ 
 
 instance : add_comm_group (X 𝒩) := pi.add_comm_group
 noncomputable instance : topological_space (X 𝒩) := Pi.topological_space
+instance : topological_add_group (X 𝒩) := Pi.topological_add_group
 
 instance : has_zero (debt_fn 𝒩 T) := pi.has_zero
-noncomputable instance : semilattice_sup (debt_fn 𝒩 T) := pi.semilattice_sup
+noncomputable instance : lattice (debt_fn 𝒩 T) := pi.lattice
 
 def continuous_wrt_assets {α : Tt T → Type*} [∀ t, topological_space (α t)]
   (v : ∀ (t : Tt T), X 𝒩 → α t) : Prop :=

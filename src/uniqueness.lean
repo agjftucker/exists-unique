@@ -37,5 +37,13 @@ begin
     apply Eψ_continuous_wrt_assets hψ ih, },
 end
 
+lemma Eψ_min_continuous_wrt_η (h : A.nonempty) (t : Tt T) (y : X 𝒩) :
+  continuous (fun (η : ℝ), A.inf' h (E_star ℰ (v ℋ ψ A) t (y + η))) :=
+begin
+  apply (Eψ_min_continuous_wrt_assets hψ ih h).comp,
+  apply (continuous_add_left y).comp,
+  rw continuous_iff_continuous_forall,
+  intro i,
+  exact continuous_id,
 end
 
