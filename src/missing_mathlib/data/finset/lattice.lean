@@ -15,6 +15,37 @@ variables {s s₁ s₂ : finset β} {f : β → α}
 @[simp] lemma sup_cons {b : β} (h : b ∉ s) : (cons b s h).sup f = f b ⊔ s.sup f :=
 fold_cons h
 
+-- a proof of sup_lt_iff without classical.choice
+@[simp] protected lemma sup_lt_iff' [is_total α (≤)] {a : α} (ha : ⊥ < a) :
+  s.sup f < a ↔ (∀ b ∈ s, f b < a) :=
+begin
+  split,
+  { intros h b hb,
+    exact lt_of_le_of_lt (le_sup hb) h, },
+  { intro h,
+    induction s using finset.induction' with c s hc ih,
+    { rwa sup_empty, },
+    { rw [sup_cons, _root_.sup_lt_iff], -- TODO: remove 'root', check on 'protected'
+      split,
+      { apply h,
+        exact mem_cons.2 (or.inl rfl), },
+      { apply ih,
+        intros b hb,
+        apply h,
+        exact mem_cons.2 (or.inr hb), }, }, },
+end
+
+-- a proof of comp_sup_eq_sup_comp without classical.choice
+lemma comp_sup_eq_sup_comp' [semilattice_sup_bot γ] (g : α → γ)
+  (g_sup : ∀ x y, g (x ⊔ y) = g x ⊔ g y) (bot : g ⊥ = ⊥) : g (s.sup f) = s.sup (g ∘ f) :=
+begin
+  induction s using finset.induction' with c s hc ih,
+  { exact bot, },
+  { rw [sup_cons, sup_cons, g_sup],
+    congr,
+    exact ih, },
+end
+
 lemma of_sup_of_forall {p : α → Prop} (h0 : p ⊥)
   (hp : ∀ (a₁ a₂ : α), p a₁ → p a₂ → p (a₁ ⊔ a₂)) (hs : ∀ b ∈ s, p (f b)) : p (s.sup f) :=
 begin
@@ -41,6 +72,11 @@ variables {s s₁ s₂ : finset β} {f : β → α}
 
 @[simp] lemma inf_cons {b : β} (h : b ∉ s) : (cons b s h).inf f = f b ⊓ s.inf f :=
 @sup_cons (order_dual α) _ _ _ _ _ h
+
+-- sup_lt_iff and lt_inf_iff should probably be declared protected
+@[simp] protected lemma lt_inf_iff' [is_total α (≤)] {a : α} (ha : a < ⊤) :
+  a < s.inf f ↔ (∀b ∈ s, a < f b) :=
+@finset.sup_lt_iff (order_dual α) _ _ _ _ _ _ ha
 
 lemma of_inf_of_forall {p : α → Prop} (h0 : p ⊤)
   (hp : ∀ (a₁ a₂ : α), p a₁ → p a₂ → p (a₁ ⊓ a₂)) (hs : ∀ b ∈ s, p (f b)) : p (s.inf f) :=
@@ -93,6 +129,14 @@ lemma sup'_insert [decidable_eq β] {b : β} (h : (insert b s).nonempty) :
   (insert b s).sup' h f = f b ⊔ s.sup' H f :=
 by { rw ←with_bot.coe_eq_coe, simp }
 
+-- sup_lt_iff is marked 'simp', should this be?
+lemma sup'_lt_iff [is_total α (≤)] {a : α} : s.sup' H f < a ↔ (∀ b ∈ s, f b < a) :=
+begin
+  rw [← with_bot.coe_lt_coe, coe_sup'_eq_sup_coe],
+  rw finset.sup_lt_iff' (with_bot.bot_lt_coe a),
+  simp_rw with_bot.coe_lt_coe,
+end
+
 lemma of_sup'_of_forall {p : α → Prop}
   (hp : ∀ (a₁ a₂ : α), p a₁ → p a₂ → p (a₁ ⊔ a₂)) (hs : ∀ b ∈ s, p (f b)) : p (s.sup' H f) :=
 begin
@@ -130,11 +174,55 @@ def inf' (s : finset β) (H : s.nonempty) (f : β → α) : α :=
 
 variables {s : finset β} (H : s.nonempty) {f : β → α}
 
+lemma lt_inf'_iff [is_total α (≤)] {a : α} : a < s.inf' H f ↔ (∀ b ∈ s, a < f b) :=
+@sup'_lt_iff (order_dual α) _ _ _ H _ _ _
+
 lemma of_inf'_of_forall {p : α → Prop}
   (hp : ∀ (a₁ a₂ : α), p a₁ → p a₂ → p (a₁ ⊓ a₂)) (hs : ∀ b ∈ s, p (f b)) : p (s.inf' H f) :=
 @of_sup'_of_forall (order_dual α) _ _ _ H _ _ hp hs
 
 end inf'
+
+section sup
+variable [semilattice_sup_bot α]
+variables {s : finset β} (H : s.nonempty) {f : β → α}
+
+lemma sup'_eq_sup : s.sup' H f = s.sup f :=
+begin
+  rw ← with_bot.coe_eq_coe,
+  rw coe_sup'_eq_sup_coe,
+  induction s using finset.induction' with c s hc ih,
+  { exfalso,
+    exact not_nonempty_empty H, },
+  { rw [sup_cons, sup_cons],
+    rcases s.eq_empty_or_nonempty with rfl | h,
+    { rw [sup_empty, sup_empty, sup_bot_eq, sup_bot_eq], },
+    { rw ih h,
+      refl, }, },
+end
+
+-- a simplified proof of sup_closed_of_sup_closed
+lemma sup_closed_of_sup_closed' {s : set α} (t : finset α) (htne : t.nonempty) (h_subset : ↑t ⊆ s)
+  (h : ∀⦃a b⦄, a ∈ s → b ∈ s → a ⊔ b ∈ s) : t.sup id ∈ s :=
+begin
+  rw ← sup'_eq_sup htne,
+  exact of_sup'_of_forall _ h h_subset,
+end
+
+end sup
+
+section inf
+variable [semilattice_inf_top α]
+variables {s : finset β} (H : s.nonempty) {f : β → α}
+
+lemma inf'_eq_inf : s.inf' H f = s.inf f :=
+@sup'_eq_sup (order_dual α) _ _ _ H _
+
+lemma inf_closed_of_inf_closed {s : set α} (t : finset α) (htne : t.nonempty) (h_subset : ↑t ⊆ s)
+  (h : ∀⦃a b⦄, a ∈ s → b ∈ s → a ⊓ b ∈ s) : t.inf id ∈ s :=
+@sup_closed_of_sup_closed (order_dual α) _ _ t htne h_subset h
+
+end inf
 
 section sup
 variables {C : β → Type*} [Π (b : β), semilattice_sup_bot (C b)]
