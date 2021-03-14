@@ -125,7 +125,7 @@ lemma sup'_cons {b : β} (hb : b ∉ s) :
   (cons b s hb).sup' (nonempty_cons hb) f = f b ⊔ s.sup' H f :=
 by { rw ←with_bot.coe_eq_coe, simp }
 
-lemma sup'_insert [decidable_eq β] {b : β} (h : (insert b s).nonempty) :
+lemma sup'_insert [decidable_eq β] {b : β} {h : (insert b s).nonempty} :
   (insert b s).sup' h f = f b ⊔ s.sup' H f :=
 by { rw ←with_bot.coe_eq_coe, simp }
 
@@ -172,7 +172,22 @@ def inf' (s : finset β) (H : s.nonempty) (f : β → α) : α :=
   ((s.inf' H f : α) : with_top α) = s.inf (coe ∘ f) :=
 @coe_sup'_eq_sup_coe (order_dual α) _ _ _ H f
 
+lemma inf'_le {s : finset β} (f : β → α) {b : β} (H2 : b ∈ s) : s.inf' ⟨b, H2⟩ f ≤ f b :=
+@le_sup' (order_dual α) _ _ _ f _ H2
+
+lemma le_inf' {s : finset β} (H : s.nonempty) (f : β → α) {a : α} (H2 : ∀ b ∈ s, a ≤ f b) :
+  a ≤ s.inf' H f :=
+@sup'_le (order_dual α) _ _ _ H f _ H2
+
 variables {s : finset β} (H : s.nonempty) {f : β → α}
+
+lemma inf'_cons {b : β} (hb : b ∉ s) :
+  (cons b s hb).inf' (nonempty_cons hb) f = f b ⊓ s.inf' H f :=
+@sup'_cons (order_dual α) _ _ _ H _ _ _
+
+lemma inf'_insert [decidable_eq β] {b : β} {h : (insert b s).nonempty} :
+  (insert b s).inf' h f = f b ⊓ s.inf' H f :=
+@sup'_insert (order_dual α) _ _ _ H _ _ _ _
 
 lemma lt_inf'_iff [is_total α (≤)] {a : α} : a < s.inf' H f ↔ (∀ b ∈ s, a < f b) :=
 @sup'_lt_iff (order_dual α) _ _ _ H _ _ _
