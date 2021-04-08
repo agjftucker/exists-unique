@@ -1,4 +1,3 @@
-import missing_mathlib.topology.algebra.ordered
 import existence continuity monotonicity
 
 local prefix `𝒫`:100 := fun {α : Type} (s : finset α), {t // t ≤ s}
@@ -37,7 +36,7 @@ begin
   apply finset.of_inf'_of_forall h,
   { exact fun _ _, continuous.min, },
   { intros i hi,
-    apply continuous_iff_continuous_forall.mp,
+    apply continuous_pi_iff.1,
     apply Eψ_continuous_wrt_assets hψ ih, },
 end
 
@@ -46,7 +45,7 @@ lemma Eψ_min_continuous_wrt_η (h : A.nonempty) {t : Tt T} {y : X 𝒩} :
 begin
   apply (Eψ_min_continuous_wrt_assets hψ ih h).comp,
   apply (continuous_add_left y).comp,
-  rw continuous_iff_continuous_forall,
+  rw continuous_pi_iff,
   intro i,
   exact continuous_id,
 end
@@ -89,7 +88,6 @@ begin
   intro h,
   rw [hψ.consistent, ← finset.lt_inf'_iff ⟨i, hi⟩] at h,
   linarith,
-  apply_instance,
 end
 
 variable (A)

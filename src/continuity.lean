@@ -1,4 +1,3 @@
-import missing_mathlib.topology.constructions
 import u_prop
 
 local prefix `𝒫`:100 := fun {α : Type} (s : finset α), {t // t ≤ s}
@@ -10,16 +9,16 @@ lemma join_continuous {t : Tt T} (f g : debt_fn 𝒩 T) :
   continuous (f t) → continuous (g t) → continuous ((f ⊔ g) t) :=
 begin
   intros hf hg,
-  rw continuous_iff_continuous_forall,
+  rw continuous_pi_iff,
   intro i,
-  rw continuous_iff_continuous_forall,
+  rw continuous_pi_iff,
   intro τ,
   apply continuous.max,
   all_goals
   { revert τ,
-    rw ←continuous_iff_continuous_forall,
+    rw ←continuous_pi_iff,
     revert i,
-    rw ←continuous_iff_continuous_forall,
+    rw ←continuous_pi_iff,
     assumption, },
 end
 
@@ -32,14 +31,14 @@ begin
   intros h t,
   rw show v ℋ ψ A t = fun y i, ite _ _ _,
   { funext y i, rw v_eq_ite, },
-  rw continuous_iff_continuous_forall,
+  rw continuous_pi_iff,
   intro i,
   split_ifs,
   { revert t,
     apply ℋ.continuity_preserving,
     intro t,
     specialize h t,
-    rw [continuous_on_iff_continuous_restrict, continuous_iff_continuous_forall] at h,
+    rw [continuous_on_iff_continuous_restrict, continuous_pi_iff] at h,
     exact h i, },
   { exact continuous_const, },
 end
@@ -68,7 +67,7 @@ begin
     apply continuous_on_empty, },
   { rw continuous_on_congr (u_eq_on_compl hne),
     apply continuous.continuous_on,
-    apply of_sup'_of_forall ⟨∅, empty_mem_ssubsets hne⟩ join_continuous,
+    apply of_sup'_of_forall ⟨∅, empty_mem_ssubsets hne⟩ (u ℋ ℰ) join_continuous,
     intros B hB,
     apply ih,
     rwa mem_ssubsets_iff at hB, },

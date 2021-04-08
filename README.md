@@ -1,4 +1,14 @@
-A formalised proof of existence and uniqueness of solution to the problem of pricing debt and equity in a banking network. The detailed exposition remains unpublished, indeed unwritten, although I shared a set of notes at the Conference on Systemic Risk and Financial Stability 2019 in Freiburg.
+A formalised proof of existence and uniqueness of solution to the problem of simultaneously pricing debt and equity in a banking network. I plan to write this up properly but have not yet done so, although I shared a set of notes at the Conference on Systemic Risk and Financial Stability 2019 in Freiburg.
+
+##Installation
+
+If you merely wish to know what this theorem says and that it is proved, you may read the description below and witness the CI-generated green tick (hopefully still to be found) above. But to examine the proof in any meaningful way you will need to install the Lean 3 theorem prover and community tools on your computer. [Here are the instructions](https://leanprover-community.github.io/get_started.html). With a little luck you will then be able to run at the command line:
+```
+leanproject get agjftucker/exists-unique
+code exists-unique
+```
+
+##Description
 
 Call a set of banks viable if assuming all its members survive we calculate a positive equity for each. This code constructs then proves unique a 'survivors' function *φ* that, given a set of banks *A* and some change in asset values making *A* unviable, prescribes a new set of surviving banks maximal among viable subsets of *A*. The correct valuation of banks' debt follows, hence of banks' equity.
 

@@ -109,7 +109,7 @@ begin
     apply hψ.idempotent, },
   suffices : (⟨ψ A t y, hUψ⟩ : {B : 𝒫 A | y ∈ U ℋ ℰ B t}) = ⊤,
   { rwa subtype.ext_iff at this, },
-  apply unique_maximal_of_greatest,
+  apply eq_top_of_maximal,
   rintros ⟨B, hUB⟩ hψB,
   apply hψ.maximal A B t y hψB B.prop,
   refine U_subset_Vψ hψ _ t hUB,

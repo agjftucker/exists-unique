@@ -15,8 +15,8 @@ begin
   exact hB.1,
 end
 
-variable (p_ : ∀ B < A, mono_wrt_assets (u ℋ ℰ B))
-include p_
+variable (ih : ∀ B < A, mono_wrt_assets (u ℋ ℰ B))
+include ih
 
 lemma ssubsets_sup'_mono {hA : A.ssubsets.nonempty} {η : ℝ} (hη : 0 ≤ η) {t : Tt T} {y : X 𝒩} :
   A.ssubsets.sup' hA (u ℋ ℰ) t y ≤ A.ssubsets.sup' hA (u ℋ ℰ) t (y + η) :=
@@ -26,7 +26,7 @@ begin
   intros B hB,
   transitivity' u ℋ ℰ B t (y + η),
   { rw finset.mem_ssubsets_iff at hB,
-    apply p_ B hB η hη, },
+    apply ih B hB η hη, },
   { apply finset.le_sup' (u ℋ ℰ) hB, },
 end
 
@@ -34,7 +34,7 @@ lemma u_mono_wrt_assets_on_compl {η : ℝ} (hη : 0 ≤ η) {t : Tt T} {y : X �
   y ∉ U ℋ ℰ A t → u ℋ ℰ A t y ≤ u ℋ ℰ A t (y + η) :=
 fun hU,
 calc u ℋ ℰ A t y = A.ssubsets.sup' _ (u ℋ ℰ) t y         : u_eq_sup' hU
-             ... ≤ A.ssubsets.sup' _ (u ℋ ℰ) t (y + η)   : ssubsets_sup'_mono p_ hη
+             ... ≤ A.ssubsets.sup' _ (u ℋ ℰ) t (y + η)   : ssubsets_sup'_mono ih hη
              ... ≤ u ℋ ℰ A t (y + η)                     : ssubsets_sup'_le t (y + η)
 
 lemma subset_shifted {η : ℝ} (hη : 0 ≤ η) (t : Tt T) (y : X 𝒩) :
@@ -49,11 +49,11 @@ begin
       apply lt_of_lt_of_le (hr i hi),
       refine mono_of_strict_mono_wrt_assets _ η hη t y i,
       apply ℰ.mono_preserving_wrt_assets,
-      exact p_ C hlt, },
+      exact ih C hlt, },
     apply q.succ hlt hr',
     apply hC',
     intros D hlt',
-    apply p_,
+    apply ih,
     exact trans hlt' hlt, },
 end
 
@@ -64,7 +64,7 @@ begin
   apply trans (ℋ.translation_invariant _ η t y),
   apply congr_fun,
   apply congr_fun,
-  rw ℋ.compatible_on_subsets (subset_shifted p_ hη),
+  rw ℋ.compatible_on_subsets (subset_shifted ih hη),
   apply congr_arg,
   funext s x h,
   rw [u_eq_ite, if_pos hi],
@@ -79,10 +79,10 @@ begin
   intros η hη t y i,
   rw [u_eq_ite, u_eq_ite],
   split_ifs with hi,
-  { rw eq_shifted p_ hη hi,
+  { rw eq_shifted ih hη hi,
     apply ℋ.mono_wrt_val_on_compl,
     intros s x hx,
-    apply u_mono_wrt_assets_on_compl p_ hη hx, },
+    apply u_mono_wrt_assets_on_compl ih hη hx, },
   { exact refl 0, },
 end
 

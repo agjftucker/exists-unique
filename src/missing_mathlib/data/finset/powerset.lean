@@ -1,5 +1,4 @@
 import data.finset.powerset
-import missing_mathlib.data.finset.basic
 
 namespace finset
 open multiset

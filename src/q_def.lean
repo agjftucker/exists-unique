@@ -1,5 +1,4 @@
 import missing_mathlib.data.finset.powerset
-import missing_mathlib.data.finset.lattice
 
 local prefix `𝒫`:100 := λ {α : Type} (s : finset α), {t // t ≤ s}
 
@@ -14,19 +13,10 @@ inductive q : α → Prop
 end q_definition
 
 section
-set_option old_structure_cmd true
-
-class bounded_join_semilattice (α : Type*) extends order_top α, semilattice_sup_bot α
-
 variables {α : Type*} [semilattice_sup_bot α] {a : α}
 
 instance semi_sup_bot_of_bdd_above : semilattice_sup_bot {b // b ≤ a} :=
 subtype.semilattice_sup_bot bot_le (fun _ _, sup_le)
-
-instance : bounded_join_semilattice {b // b ≤ a} :=
-{ top := ⟨a, refl _⟩,
-  le_top := fun ⟨b, h⟩, h,
-  ..semi_sup_bot_of_bdd_above }
 
 variables {r : α → α → Prop} {r_ : {b // b ≤ a} → {b // b ≤ a} → Prop}
 variables (hr_ : ∀ b c, c < b → (r ↑c ↑b ↔ r_ c b))
