@@ -5,6 +5,7 @@ local prefix `𝒫`:100 := fun {α : Type} (s : finset α), {t // t ≤ s}
 variables {𝒩 : Type} [decidable_eq 𝒩] {T : with_top ℝ}
 variables {ℋ : well_behaved_soln 𝒩 T} {ℰ : equity_function 𝒩 T}
 
+lemma U_empty_eq_univ : ∀ t, U ℋ ℰ ∅ t = set.univ := V_empty_eq_univ
 lemma u_match : ∀ A t y, u ℋ ℰ A t y = u ℋ ℰ (φ ℋ ℰ A t y) t y := v_match
 
 lemma u_eq_ite (A : finset 𝒩) (t : Tt T) (y : X 𝒩) (i : 𝒩) : u ℋ ℰ A t y i =
@@ -51,7 +52,7 @@ lemma u_mono : ∀ {A B : finset 𝒩}, B ≤ A → u ℋ ℰ B ≤ u ℋ ℰ A 
 finset.strong_induction φp.uB_le_uA
 
 lemma u_eq_sup' {A : finset 𝒩} {t : Tt T} {y : X 𝒩} (h : y ∉ U ℋ ℰ A t) :
-  u ℋ ℰ A t y = A.ssubsets.sup' (ssubsets_nonempty_of_not_mem_U h) (u ℋ ℰ) t y :=
+  u ℋ ℰ A t y = A.ssubsets.sup' (ssubsets_nonempty h) (u ℋ ℰ) t y :=
 begin
   apply le_antisymm,
   { rw u_match,

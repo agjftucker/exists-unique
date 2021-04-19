@@ -1,19 +1,28 @@
-A formalised proof of existence and uniqueness of solution to the pricing problem for debt and equity in a banking network. I do plan to write this up properly but it's not done yet, although I shared a set of notes at the Conference on Systemic Risk and Financial Stability 2019 in Freiburg.
+A formalised proof of existence and uniqueness of solution to the simultaneous pricing problem for debt and equity on a banking network.
+I gave a talk on the model and shared notes on this proof at the Conference on Systemic Risk and Financial Stability 2019 in Freiburg.
+A paper is in preparation.
 
-## Installation
+If this badge says 'continuous integration: passing' then the theorem is correct.
 
-If you merely wish to know what this theorem says and that it is proved, you may read the description below and witness the CI-generated green tick (hopefully still to be found) above. But to examine the proof in any depth you will need an appropriate environment. Potentially an easy (browser-only) way to find one is by clicking this button.
+![](https://github.com/agjftucker/exists-unique/workflows/continuous%20integration/badge.svg?branch=master)
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/agjftucker/exists-unique)
+## What can I do with it?
 
-Alternatively you may install the Lean 3 theorem prover and community tools on your computer using [these instructions](https://leanprover-community.github.io/get_started.html). With a little luck you will then be able to run the following at the command line.
+To engage with the contents of this repository you will need to know something about [the Lean3 theorem prover and its mathematical library](https://leanprover-community.github.io/).
+You will also need a suitable environment.
+One potentially cheap (browser-only) way to get up and running is by clicking on this button.
+
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/from-referrer/)
+
+A better way is to install the Lean 3 theorem prover and community tools on your computer using [these instructions](https://leanprover-community.github.io/get_started.html).
+With a little luck you will then be able to run the following at the command line.
 
 ```
 leanproject get agjftucker/exists-unique
 code exists-unique
 ```
 
-## Description
+## What does it say?
 
 Call a set of banks viable if assuming all its members survive we calculate a positive equity for each. This code constructs then proves unique a 'survivors' function *φ* that, given a set of banks *A* and some change in asset values making *A* unviable, prescribes a new set of surviving banks maximal among viable subsets of *A*. The correct valuation of banks' debt follows, hence of banks' equity.
 

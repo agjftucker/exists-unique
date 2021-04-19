@@ -103,26 +103,6 @@ by { delta r', apply_instance, }
 
 variables {ℋ} {ℰ}
 
-lemma U_empty_eq_univ (t : Tt T) : U ℋ ℰ ∅ t = set.univ :=
-begin
-  apply set.eq_univ_of_forall,
-  intro y,
-  apply finset.empty_subset,
-end
-
-lemma ssubsets_nonempty_of_not_mem_U {A : finset 𝒩} {t : Tt T} {y : X 𝒩} :
-  y ∉ U ℋ ℰ A t → A.ssubsets.nonempty :=
-begin
-  intro hy,
-  use ∅,
-  apply finset.empty_mem_ssubsets,
-  rw finset.nonempty_iff_ne_empty,
-  intro he,
-  apply hy,
-  rw [he, U_empty_eq_univ],
-  apply set.mem_univ,
-end
-
 lemma r_iff' {t : Tt T} {y : X 𝒩} (A : finset 𝒩) :
   ∀ (B C : 𝒫 A), C < B → (r ℋ ℰ t y ↑C ↑B ↔ r' ℋ ℰ A t y C B) :=
 fun B C hlt, by refl

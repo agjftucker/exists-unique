@@ -7,6 +7,25 @@ variables {ℋ : well_behaved_soln 𝒩 T}
 
 variables {ψ ψ' : ∀ (B : finset 𝒩), Tt T → X 𝒩 → 𝒫 B}
 
+lemma V_empty_eq_univ (t : Tt T) : V ψ ∅ t = set.univ :=
+begin
+  apply set.eq_univ_of_forall,
+  intro y,
+  apply finset.empty_subset,
+end
+
+lemma ssubsets_nonempty {A : finset 𝒩} {t : Tt T} {y : X 𝒩} : y ∉ V ψ A t → A.ssubsets.nonempty :=
+begin
+  intro hy,
+  use ∅,
+  apply finset.empty_mem_ssubsets,
+  rw finset.nonempty_iff_ne_empty,
+  intro he,
+  apply hy,
+  rw [he, V_empty_eq_univ],
+  trivial,
+end
+
 lemma v_eq_of_ψ_eq_on_ssubsets (A : finset 𝒩) :
   (∀ B < A, ψ B = ψ' B) → (∀ B < A, v ℋ ψ B = v ℋ ψ' B) :=
 begin
