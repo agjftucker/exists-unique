@@ -33,7 +33,7 @@ begin
   { convert this,
     ext y,
     rw finset.inf'_apply, },
-  apply finset.of_inf'_of_forall h,
+  apply finset.inf'_induction h,
   { exact fun _ _, continuous.min, },
   { intros i hi,
     apply continuous_pi_iff.1,

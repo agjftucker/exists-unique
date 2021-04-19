@@ -41,7 +41,7 @@ end
 
 lemma q_sup_of_forall (s : finset α) : (∀ b ∈ s, q r b) → q r (s.sup id) :=
 begin
-  apply finset.of_sup_of_forall,
+  apply finset.sup_induction,
   apply q.base,
   apply q_sup_of_foreach,
 end
