@@ -1,8 +1,8 @@
 A formalised proof of existence and uniqueness of solution to the simultaneous pricing problem for debt and equity on a banking network.
 I gave a talk on the model and shared notes on this proof at the Conference on Systemic Risk and Financial Stability 2019 in Freiburg.
-A paper is in preparation.
+The paper is in preparation.
 
-If there is a badge here saying *continuous integration: passing* then the theorem is correct.
+If there is a badge here saying "continuous integration: passing" then the theorem is correct.
 
 ![](https://github.com/agjftucker/exists-unique/workflows/continuous%20integration/badge.svg?branch=master)
 

@@ -1,3 +1,4 @@
+import missing_mathlib.data.finset.powerset
 import v_def
 
 local prefix `𝒫`:100 := fun {α : Type} (s : finset α), {t // t ≤ s}
