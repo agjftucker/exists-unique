@@ -1,21 +1,21 @@
-A formalised proof of existence and uniqueness of solution to the simultaneous pricing problem for debt and equity on a banking network.
+A formalised proof of existence and uniqueness of solution to the simultaneous debt and equity pricing problem on a banking network.
 I gave a talk on the model and shared notes on this proof at the Conference on Systemic Risk and Financial Stability 2019 in Freiburg.
 The paper is in preparation.
 
-If there is a badge here saying "continuous integration: passing" then the theorem is correct.
+If the badge says "continuous integration passing" then the theorem is correct.
 
 ![](https://github.com/agjftucker/exists-unique/workflows/continuous%20integration/badge.svg?branch=master)
 
 ## What can I do with it?
 
-To engage with the contents of this repository you will need to know something about [the Lean3 theorem prover and its mathematical library](https://leanprover-community.github.io/).
+To interact with the contents of this repository you will need some familiarity with [the Lean 3 theorem prover and its mathematical library](https://leanprover-community.github.io/).
 You will also need a suitable environment.
 One potentially cheap (browser-only) way to get up and running is by clicking on this button.
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/from-referrer/)
 
-A better way is to install the Lean 3 theorem prover and community tools on your computer using [these instructions](https://leanprover-community.github.io/get_started.html).
-With a little luck you will then be able to run the following at the command line.
+A better way is to install Lean and its community tools on your computer using [these instructions](https://leanprover-community.github.io/get_started.html).
+With a little luck you will then be able to run the following from the command line.
 
 ```
 leanproject get agjftucker/exists-unique
