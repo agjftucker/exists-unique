@@ -10,12 +10,12 @@ If the badge says "continuous integration passing" then the theorem is correct.
 
 To interact with the contents of this repository you will need some familiarity with [the Lean 3 theorem prover and its mathematical library](https://leanprover-community.github.io/).
 You will also need a suitable environment.
-One potentially cheap (browser-only) way to get up and running is by clicking on this button.
+One potentially cheap (browser only) way to get up and running is by clicking on this button.
 
 [![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/from-referrer/)
 
-A better way is to install Lean and its community tools on your computer using [these instructions](https://leanprover-community.github.io/get_started.html).
-With a little luck you will then be able to run the following from the command line.
+A better way is to install VS Code with Lean and community tools on your computer using [these instructions](https://leanprover-community.github.io/get_started.html).
+You will then be able to run the following from the command line.
 
 ```
 leanproject get agjftucker/exists-unique
@@ -24,7 +24,7 @@ code exists-unique
 
 ## What does it say?
 
-Call a set of banks viable if assuming all its members survive we calculate a positive equity for each. This code constructs then proves unique a 'survivors' function *φ* that, given a set of banks *A* and some change in asset values making *A* unviable, prescribes a new set of surviving banks maximal among viable subsets of *A*. The correct valuation of banks' debt follows, hence of banks' equity.
+Call a set of banks *viable* if assuming all its members survive we calculate a positive equity for each. This code constructs then proves unique a *survivors* function *φ* that, given a set of banks *A* and some change in asset values making *A* unviable, prescribes a new set of surviving banks maximal among viable subsets of *A*. Through a relatively straightforward (though numerically demanding) procedure the survivors function determines debt and equity valuations in turn; but the resulting circle of definitions need not disturb us if we can establish existence and uniqueness at one point in it.
 
 Assumptions made are of a solution procedure ℋ for debt valuation and another ℰ for equity valuation satisfying properties obeyed by those we would use in practice. Also that for every set of banks there is an amount by which external assets could fall to make it unviable whatever the solution to the debt pricing problem.
 
