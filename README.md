@@ -4,7 +4,7 @@ The paper is in preparation.
 
 If the badge says "continuous integration passing" then the theorem is correct.
 
-![](https://github.com/agjftucker/exists-unique/workflows/continuous%20integration/badge.svg?branch=master)
+<img class="NO-CACHE" src="workflows/continuous%20integration/badge.svg?branch=master" />
 
 ## What can I do with it?
 
@@ -12,7 +12,7 @@ To interact with the contents of this repository you will need some familiarity 
 You will also need a suitable environment.
 One potentially cheap (browser only) way to get up and running is by clicking on this button.
 
-[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/from-referrer/)
+[![Open in Gitpod](https://gitpod.io/button/open-in-gitpod.svg)](https://gitpod.io/#https://github.com/agjftucker/exists-unique)
 
 A better way is to install VS Code with Lean and community tools on your computer using [these instructions](https://leanprover-community.github.io/get_started.html).
 You will then be able to run the following from the command line.
@@ -24,9 +24,14 @@ code exists-unique
 
 ## What does it say?
 
-Call a set of banks *viable* if assuming all its members survive we calculate a positive equity for each. This code constructs then proves unique a *survivors* function *φ* that, given a set of banks *A* and some change in asset values making *A* unviable, prescribes a new set of surviving banks maximal among viable subsets of *A*. Through a relatively straightforward (though numerically demanding) procedure the survivors function determines debt and equity valuations in turn; but the resulting circle of definitions need not disturb us if we can establish existence and uniqueness at one point in it.
+Call a set of banks *viable* if under the assumption that all its members survive we calculate a positive equity for each.
+This code constructs then proves unique a *survivors* function *φ* that, given a set of banks *A* and some change in asset values making *A* unviable, prescribes a new set of surviving banks maximal among viable subsets of *A*.
+Through a relatively straightforward (though numerically demanding) procedure, the survivors function determines debt, then equity, valuations in turn; the resultant circle of definitions is unproblematic as long as we can establish existence and uniqueness at one point in it.
 
-Assumptions made are of a solution procedure ℋ for debt valuation and another ℰ for equity valuation satisfying properties obeyed by those we would use in practice. Also that for every set of banks there is an amount by which external assets could fall to make it unviable whatever the solution to the debt pricing problem.
+Assumptions made are of a solution procedure ℋ for debt valuation and another ℰ for equity valuation, satisfying properties obeyed by those we would use in practice.
+Also that for every set of banks there is an amount by which external assets could fall to make it unviable.
+
+<img src="import-graph.svg" />
 
 Properties of ℋ are modelled on those of a solution to the Black-Scholes-Merton parabolic partial differential equation. Debt is thus valued employing the principles of option pricing. Given a valuation function defined outside some time-dependent domain *V* (implying initial/boundary conditions), operator ℋ will return a function defined on the whole space (the solution). (Formalised in [v_def.lean](src/v_def.lean).)
 1. `matching_on_complement` The function supplied in a set of conditions with domain *V* will match the solution on the complement of *V*.

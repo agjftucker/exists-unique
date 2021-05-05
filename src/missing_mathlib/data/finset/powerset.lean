@@ -20,27 +20,10 @@ iff.intro
 lemma empty_mem_ssubsets {s : finset α} (h : s.nonempty) : ∅ ∈ s.ssubsets :=
 mem_ssubsets_iff.2 (lt_of_le_of_ne bot_le (nonempty.ne_empty h).symm)
 
-variables {p : finset α → Prop}
-
-def decidable_exists_of_ssubsets {s : finset α} :
-  (∀ t ⊂ s, decidable (p t)) → decidable (∃ t ⊂ s, p t) :=
-begin
-  intro h,
-  suffices : decidable (∃ t (h₁ : t ∈ s.powerset) (h₂ : ¬ s ⊆ t), p t),
-  { apply decidable_of_decidable_of_iff this,
-    split,
-    { rintros ⟨t, h₁, h₂, h₃⟩,
-      use [t, ⟨mem_powerset.1 h₁, h₂⟩, h₃], },
-    { rintros ⟨t, ⟨h₁, h₂⟩, h₃⟩,
-      use [t, mem_powerset.2 h₁, h₂, h₃], }, },
-  apply @finset.decidable_dexists_finset _ _ _ _,
-  intros t h₁,
-  suffices : ¬ s ⊆ t → decidable (p t),
-  { apply @exists_prop_decidable _ _ _ this, },
-  intro h₂,
-  apply h,
-  use [mem_powerset.1 h₁, h₂],
-end
+def decidable_exists_of_ssubsets {s : finset α} {p : ∀ t ⊂ s, Prop}
+  (hu : ∀ t (h : t ⊂ s), decidable (p t h)) : decidable (∃ t (h : t ⊂ s), p t h) :=
+decidable_of_iff (∃ t (h₁ : t ∈ s.powerset) (h₂ : ¬ s ⊆ t), p t ⟨mem_powerset.1 h₁, h₂⟩)
+⟨(λ ⟨t, h₁, h₂, h₃⟩, ⟨t, _, h₃⟩), (λ ⟨t, ⟨h₁, h₂⟩, h₃⟩, ⟨t, mem_powerset.2 h₁, h₂, h₃⟩)⟩
 
 end powerset
 end finset
