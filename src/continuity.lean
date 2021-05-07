@@ -70,7 +70,7 @@ begin
     apply sup'_induction ⟨∅, empty_mem_ssubsets hne⟩ (u ℋ ℰ) join_continuous,
     intros B hB,
     apply ih,
-    rwa mem_ssubsets_iff at hB, },
+    rwa mem_ssubsets at hB, },
 end
 
 lemma u_continuous_wrt_assets : ∀ A, continuous_wrt_assets (u ℋ ℰ A) :=

@@ -1,4 +1,4 @@
-import missing_mathlib.data.finset.powerset
+import data.finset.powerset
 
 local prefix `𝒫`:100 := λ {α : Type} (s : finset α), {t // t ≤ s}
 
@@ -100,13 +100,9 @@ begin
   intro hB,
   have : ∀ (C : finset β) (hlt : C < B), decidable (∃ (h : 𝒮 C), r ⟨C, h⟩ B ∧ @q _ 𝒮b r ⟨C, h⟩),
   { intros C hlt,
-    apply @exists_prop_decidable _ _ _ _,
-    apply_instance,
-    intro hC,
-    apply @and.decidable _ _ _ _,
-    apply_instance,
-    exact ih ⟨C, hC⟩ hlt, },
-  cases finset.decidable_exists_of_ssubsets this with hne he,
+    haveI : ∀ (h : C ∈ 𝒮), decidable (@q _ 𝒮b r ⟨C, h⟩) := fun h, ih ⟨C, h⟩ hlt,
+    apply_instance, },
+  cases finset.decidable_exists_of_decidable_ssubsets this with hne he,
   { apply is_false,
     intro hq,
     rcases hq with _ | ⟨_, ⟨C, hC⟩, hlt, hr, hq⟩,

@@ -10,7 +10,7 @@ lemma ssubsets_sup'_le {hA : A.ssubsets.nonempty} : A.ssubsets.sup' hA (u ℋ �
 begin
   apply finset.sup'_le _ (u ℋ ℰ),
   intros B hB,
-  rw finset.mem_ssubsets_iff at hB,
+  rw finset.mem_ssubsets at hB,
   apply u_mono,
   exact hB.1,
 end
@@ -25,7 +25,7 @@ begin
   apply finset.sup'_le _ (fun B, u ℋ ℰ B t y),
   intros B hB,
   transitivity' u ℋ ℰ B t (y + η),
-  { rw finset.mem_ssubsets_iff at hB,
+  { rw finset.mem_ssubsets at hB,
     apply ih B hB η hη, },
   { apply finset.le_sup' (u ℋ ℰ) hB, },
 end

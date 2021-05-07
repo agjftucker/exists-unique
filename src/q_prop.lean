@@ -8,7 +8,7 @@ variables {α : Type*} [semilattice_sup_bot α]
 class tuckerian {α β} [preorder α] [semilattice_sup_bot β] (r : α → β → Prop) : Prop :=
 (bottom : ∀ (b : α), r b ⊥)
 (sup : ∀ (b c : β) (d : α), r d b → r d c → r d (b ⊔ c))
-(downward_closed : ∀ (c d : α), d ≤ c → ∀ (b : β), r d b → r c b)
+(mono : ∀ (c d : α), d ≤ c → ∀ (b : β), r d b → r c b)
 
 variables {r : α → α → Prop} [ht : tuckerian r]
 include ht
@@ -18,15 +18,15 @@ begin
   intro hqb,
   cases hqb with _ c hlt hr hqc,
   { exact tuckerian.bottom ⊥, },
-  { exact tuckerian.downward_closed b c (le_of_lt hlt) b hr, },
+  { exact tuckerian.mono b c (le_of_lt hlt) b hr, },
 end
 
 lemma r_joins_of_q {b c d : α} : r d c → q r b → r (b ⊔ d) (b ⊔ c) :=
 begin
   intros hr hq,
   apply tuckerian.sup,
-  { exact tuckerian.downward_closed (b ⊔ d) b le_sup_left b (r_self_of_q hq), },
-  { exact tuckerian.downward_closed (b ⊔ d) d le_sup_right c hr, },
+  { exact tuckerian.mono (b ⊔ d) b le_sup_left b (r_self_of_q hq), },
+  { exact tuckerian.mono (b ⊔ d) d le_sup_right c hr, },
 end
 
 lemma q_sup_of_foreach {b c : α} : q r b → q r c → q r (b ⊔ c) :=

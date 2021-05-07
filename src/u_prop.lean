@@ -57,12 +57,12 @@ begin
   apply le_antisymm,
   { rw u_match,
     apply finset.le_sup' (u ℋ ℰ),
-    rw finset.mem_ssubsets_iff,
+    rw finset.mem_ssubsets,
     use [(φ ℋ ℰ A t y).prop, h], },
   { apply finset.sup'_le _ (u ℋ ℰ),
     intros B hB y,
     apply u_mono,
-    rw finset.mem_ssubsets_iff at hB,
+    rw finset.mem_ssubsets at hB,
     exact hB.1, },
 end
 
@@ -94,12 +94,12 @@ end
 instance (t : Tt T) (y : X 𝒩) : tuckerian (r ℋ ℰ t y) :=
 { bottom := hr0,
   sup := hr2,
-  downward_closed := hr1 }
+  mono := hr1 }
 
 instance (A : finset 𝒩) (t : Tt T) (y : X 𝒩) : tuckerian (r' ℋ ℰ A t y) :=
 { bottom := fun B, hr0 ↑B,
   sup := fun B C D, hr2 ↑B ↑C ↑D,
-  downward_closed := fun C D hle B, hr1 ↑C ↑D hle ↑B }
+  mono := fun C D hle B, hr1 ↑C ↑D hle ↑B }
 
 lemma q_φ {A : finset 𝒩} {t : Tt T} {y : X 𝒩} : q (r ℋ ℰ t y) (φ ℋ ℰ A t y) :=
 begin
