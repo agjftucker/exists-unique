@@ -4,7 +4,7 @@ The paper is in preparation.
 
 If the badge says "continuous integration passing" then the theorem is correct.
 
-<img class="NO-CACHE" src="workflows/continuous%20integration/badge.svg?branch=master" />
+<img class="NO-CACHE" src="https://github.com/agjftucker/exists-unique/workflows/continuous%20integration/badge.svg?branch=master" />
 
 ## What can I do with it?
 
@@ -28,10 +28,11 @@ Call a set of banks *viable* if under the assumption that all its members surviv
 This code constructs then proves unique a *survivors* function *φ* that, given a set of banks *A* and some change in asset values making *A* unviable, prescribes a new set of surviving banks maximal among viable subsets of *A*.
 Through a relatively straightforward (though numerically demanding) procedure, the survivors function determines debt, then equity, valuations in turn; the resultant circle of definitions is unproblematic as long as we can establish existence and uniqueness at one point in it.
 
-Assumptions made are of a solution procedure ℋ for debt valuation and another ℰ for equity valuation, satisfying properties obeyed by those we would use in practice.
+Assumptions made are of a solution procedure ℋ for debt valuation and another ℰ for equity valuation satisfying properties obeyed by those we would use in practice.
 Also that for every set of banks there is an amount by which external assets could fall to make it unviable.
 
-<img src="import-graph.svg" />
+<p align="center"><img src="import-graph.svg" alt="Dependency graph" width="352" height="404" /></p>
+<p align="center">File Dependency Graph</p>
 
 Properties of ℋ are modelled on those of a solution to the Black-Scholes-Merton parabolic partial differential equation. Debt is thus valued employing the principles of option pricing. Given a valuation function defined outside some time-dependent domain *V* (implying initial/boundary conditions), operator ℋ will return a function defined on the whole space (the solution). (Formalised in [v_def.lean](src/v_def.lean).)
 1. `matching_on_complement` The function supplied in a set of conditions with domain *V* will match the solution on the complement of *V*.
