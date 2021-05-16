@@ -31,7 +31,7 @@ Through a relatively straightforward (though numerically demanding) procedure, t
 Assumptions made are of a solution procedure ℋ for debt valuation and another ℰ for equity valuation satisfying properties obeyed by those we would use in practice.
 Also that for every set of banks there is an amount by which external assets could fall to make it unviable.
 
-<p align="center"><img src="import-graph.svg" alt="Dependency graph" width="352" height="404" /></p>
+<p align="center"><img src="import-graph.svg" width="169pt" height="166pt" /></p>
 <p align="center">File Dependency Graph</p>
 
 Properties of ℋ are modelled on those of a solution to the Black-Scholes-Merton parabolic partial differential equation. Debt is thus valued employing the principles of option pricing. Given a valuation function defined outside some time-dependent domain *V* (implying initial/boundary conditions), operator ℋ will return a function defined on the whole space (the solution). (Formalised in [v_def.lean](src/v_def.lean).)

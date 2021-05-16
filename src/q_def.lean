@@ -83,10 +83,7 @@ def strong_induction {p : 𝒮 → Sort*} : (∀ (B : 𝒮), (∀ C, C < B → p
 fun h', suffices h : ∀ (B : finset β) (hB : B ∈ 𝒮), p ⟨B, hB⟩, from (fun ⟨B, hB⟩, h B hB),
 finset.strong_induction (fun B ih hB, h' ⟨B, hB⟩ (fun ⟨C, hC⟩ hlt, ih C hlt hC))
 
-variables [decidable_pred 𝒮] (𝒮bot : 𝒮 ⊥)
-include 𝒮bot
-
-variables (r : 𝒮 → 𝒮 → Prop) [decidable_rel r]
+variables [decidable_pred 𝒮] (𝒮bot : 𝒮 ⊥) (r : 𝒮 → 𝒮 → Prop) [decidable_rel r]
 
 def decidable_of_ssubsets : let 𝒮b := subtype.order_bot 𝒮bot in
   ∀ B, (∀ C < B, decidable (@q _ 𝒮b r C)) → decidable (@q _ 𝒮b r B) :=
@@ -106,11 +103,8 @@ begin
   { apply is_false,
     intro hq,
     rcases hq with _ | ⟨_, ⟨C, hC⟩, hlt, hr, hq⟩,
-    { apply hB,
-      refl, },
-    { apply hne,
-      refine ⟨C, _, hC, hr, hq⟩,
-      exact hlt, }, },
+    { exact hB rfl, },
+    { exact hne ⟨C, hlt, hC, hr, hq⟩, }, },
   { apply is_true,
     rcases he with ⟨C, hlt, hC, hr, hq⟩,
     apply @q.succ _ 𝒮b _ _ ⟨C, hC⟩ hlt hr hq, },
