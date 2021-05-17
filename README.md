@@ -25,7 +25,7 @@ code exists-unique
 ## What does it say?
 
 Call a set of banks *viable* if under the assumption that all its members survive we calculate a positive equity for each.
-This code constructs then proves unique a *survivors* function `φ` that, given a set of banks `A` and some change in asset values making `A` unviable, prescribes a new set of surviving banks maximal among viable subsets of `A`.
+This code constructs then proves unique a *survivors function* `φ` that, given a set of banks `A` and some change in asset values making `A` unviable, prescribes a new set of surviving banks maximal among viable subsets of `A`.
 The survivors function determines debt and equity valuations in turn.
 Our result shows that the circle of definitions is sensibly resolved.
 
@@ -43,11 +43,11 @@ At `t` we will be interested in maturities `τ` between `t` and `T`.
 def Tt (T : with_top ℝ) : set ℝ := {t : ℝ | 0 ≤ t ∧ (t : with_top ℝ) < T}
 def Tτ {T : with_top ℝ} (t : Tt T) : set ℝ := {τ : ℝ | t.1 < τ ∧ (τ : with_top ℝ) ≤ T}
 ```
-Where `𝒩` is the set of banks, `X 𝒩` is the space of external asset valuations.
+Where `𝒩` is the set of banks, `X 𝒩` is the space of (log) external asset values.
 ```lean
 def X (𝒩 : Type) := 𝒩 → ℝ
 ```
-A *debt function* will return a valuation at any point in time and space for each bank's debt and for each possible maturity.
+A *debt function* returns at any point in time and space a valuation for each bank's debt for each possible maturity.
 ```lean
 def debt_fn (𝒩 : Type) (T : with_top ℝ) := ∀ (t : Tt T), X 𝒩 → 𝒩 → Tτ t → ℝ
 ```
@@ -75,13 +75,13 @@ The domain `V` associated with a set of banks `A` is exactly the region in which
 def V (ψ : ∀ (B : finset 𝒩), Tt T → X 𝒩 → 𝒫 B) (A : finset 𝒩) : Tt T → set (X 𝒩) :=
 fun t y, A ≤ ψ A t y
 ```
-Given a set of banks `B`, the survivors function associated with `B`, and a debt function for each proper subset of `B`, we use `ℋ` to calculate the debt function for `B` itself.
+Given a set of banks `B`, a survivors function for `B` and a debt function for each proper subset of `B`, we use `ℋ` to calculate a debt function for `B` itself.
 ```lean
 def v_mk {B : finset 𝒩} (ψB : Tt T → X 𝒩 → 𝒫 B) :
   (∀ C < B, debt_fn 𝒩 T) → debt_fn 𝒩 T :=
 fun υ t y i, if i ∈ B then ℋ (fun s x h, υ (ψB s x) ⟨(ψB s x).prop, h⟩ s x i) t y else 0
 ```
-By induction we can find debt functions for each set of banks up to the full set (likely what we are interested in).
+By induction we find debt functions for each set of banks up to the full set (likely the one we want).
 ```lean
 def v (ψ : ∀ (B : finset 𝒩), Tt T → X 𝒩 → 𝒫 B) : finset 𝒩 → debt_fn 𝒩 T :=
 finset.strong_induction (fun B, v_mk ℋ (ψ B))
@@ -89,9 +89,12 @@ finset.strong_induction (fun B, v_mk ℋ (ψ B))
 
 ### [u_def](src/u_def.lean)
 
-Properties of `ℰ` are modelled on those of a solution procedure for a certain variational inequality performed in practice by iteration to a fixed point.
+Properties of `ℰ` are modelled on those of a solution procedure for a variational inequality performed in practice by iteration to a fixed point.
 Given as input debt valuations at a point in time and space, `ℰ` will return equity valuations applying at that point.
 ```lean
+def E_star (ℰ : ∀ (t : Tt T), X 𝒩 → (𝒩 → Tτ t → ℝ) → 𝒩 → ℝ) : debt_fn 𝒩 T → Tt T → X 𝒩 → 𝒩 → ℝ :=
+fun υ t y, ℰ t y (υ t y)
+
 structure equity_function :=
 (ℰ : ∀ (t : Tt T), X 𝒩 → (𝒩 → Tτ t → ℝ) → 𝒩 → ℝ)
 (mono_wrt_debt_valuation {t : Tt T} {y : X 𝒩} {υ₁ υ₂ : 𝒩 → Tτ t → ℝ} : υ₁ ≤ υ₂ → ℰ t y υ₁ ≤ ℰ t y υ₂)
@@ -102,7 +105,7 @@ structure equity_function :=
 ### [existence](src/existence.lean)
 
 We specify three properties required of a survivors function.
-Compare to the description given in the first paragraph of [this section](#what-does-it-say)
+Compare to the description given in the [first paragraph](#what-does-it-say) of this section.
 ```lean
 structure survivors_fn (ψ :  ∀ (A : finset 𝒩), Tt T → X 𝒩 → 𝒫 A) : Prop :=
 (idempotent : ∀ A t y, y ∈ V ψ (ψ A t y) t)
