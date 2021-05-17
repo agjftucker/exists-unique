@@ -30,7 +30,7 @@ The survivors function determines debt and equity valuations in turn.
 Our result shows that the circle of definitions is sensibly resolved.
 
 Assumptions made are of a solution procedure `ℋ` for debt valuation and another `ℰ` for equity valuation satisfying properties obeyed by those we would use in practice.
-Also that for every set of banks there is an amount by which external assets could fall to make it unviable.
+Also that for every set of banks there is an amount by which external assets could fall to make it unviable*.
 
 <p align="center"><img src="import-graph.svg" width="338pt" height="332pt" /></p>
 <p align="center">File Dependency Graph</p>
@@ -115,7 +115,12 @@ structure survivors_fn (ψ :  ∀ (A : finset 𝒩), Tt T → X 𝒩 → 𝒫 A)
 
 ### [uniqueness](src/uniqueness.lean)
 
-Ultimately we are able to prove that a survivors function exists and is unique.
+With one additional assumption (*)
+```lean
+variable (crash : ∀ ψ A t y,
+  ∃ (η : ℝ) (hη : η ≤ 0) (i : 𝒩) (hi : i ∈ A), E_star ℰ (v ℋ ψ A) t (y + η) i ≤ 0)
+```
+we are able to prove that a survivors function exists and is unique.
 ```lean
 theorem exists_unique_soln : ∃! ψ, survivors_fn ℋ ℰ ψ := ⟨φ ℋ ℰ, exists_soln, unique_soln crash⟩
 ```
