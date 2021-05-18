@@ -5,7 +5,7 @@ local prefix `𝒫`:100 := fun {α : Type} (s : finset α), {t // t ≤ s}
 variables {𝒩 : Type} [decidable_eq 𝒩] {T : with_top ℝ}
 variables {ℋ : well_behaved_soln 𝒩 T} {ℰ : equity_function 𝒩 T}
 
-variable (crash : ∀ ψ A t y,
+variable (crash : ∀ ψ {A : finset 𝒩} (h : A.nonempty) (t : Tt T) (y : X 𝒩),
   ∃ (η : ℝ) (hη : η ≤ 0) (i : 𝒩) (hi : i ∈ A), E_star ℰ (v ℋ ψ A) t (y + η) i ≤ 0)
 
 section ind
@@ -56,7 +56,7 @@ lemma exists_η₀_of_mem_Vψ (h : A.nonempty) {t : Tt T} {y : X 𝒩} :
   y ∈ V ψ A t → ∃ (η₀ : ℝ) (hη₀ : η₀ < 0), A.inf' h (E_star ℰ (v ℋ ψ A) t (y + η₀)) = 0 :=
 begin
   intro hV,
-  specialize crash ψ A t y,
+  specialize crash ψ h t y,
   rcases crash with ⟨η, hη, i, hi, hE⟩,
   have hl : A.inf' h (E_star ℰ (v ℋ ψ A) t (y + η)) ≤ 0,
   { exact le_trans (finset.inf'_le _ hi) hE, },

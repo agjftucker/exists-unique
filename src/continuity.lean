@@ -2,8 +2,7 @@ import u_prop
 
 local prefix `𝒫`:100 := fun {α : Type} (s : finset α), {t // t ≤ s}
 
-variables {𝒩 : Type} [decidable_eq 𝒩] {T : with_top ℝ}
-variables {ℋ : well_behaved_soln 𝒩 T} {ℰ : equity_function 𝒩 T}
+variables {𝒩 : Type} {T : with_top ℝ}
 
 lemma join_continuous {t : Tt T} (f g : debt_fn 𝒩 T) :
   continuous (f t) → continuous (g t) → continuous ((f ⊔ g) t) :=
@@ -21,6 +20,8 @@ begin
     rw ←continuous_pi_iff,
     assumption, },
 end
+
+variables [decidable_eq 𝒩] {ℋ : well_behaved_soln 𝒩 T} {ℰ : equity_function 𝒩 T}
 
 section v
 variable {ψ : ∀ (B : finset 𝒩), Tt T → X 𝒩 → 𝒫 B}

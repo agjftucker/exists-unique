@@ -9,7 +9,7 @@ def X (𝒩 : Type) := 𝒩 → ℝ
 
 def debt_fn (𝒩 : Type) (T : with_top ℝ) := ∀ (t : Tt T), X 𝒩 → 𝒩 → Tτ t → ℝ
 
-variables {𝒩 : Type} [decidable_eq 𝒩] {T : with_top ℝ}
+variables {𝒩 : Type} {T : with_top ℝ}
 
 instance : has_coe ℝ (X 𝒩) := ⟨fun r i, r⟩
 instance : has_subset (Tt T → set (X 𝒩)) := ⟨fun V₁ V₂, (∀ t, V₁ t ⊆ V₂ t)⟩
@@ -53,10 +53,10 @@ instance : has_coe_to_fun (well_behaved_soln 𝒩 T) :=
 { F := fun _, ∀ {V : Tt T → set (X 𝒩)} (v' : ∀ t y, y ∉ V t → Tτ t → ℝ), (∀ t, X 𝒩 → Tτ t → ℝ),
   coe := well_behaved_soln.ℋ }
 
-variable (ℋ : well_behaved_soln 𝒩 T)
-
 def V (ψ : ∀ (B : finset 𝒩), Tt T → X 𝒩 → 𝒫 B) (A : finset 𝒩) : Tt T → set (X 𝒩) :=
 fun t y, A ≤ ψ A t y
+
+variables [decidable_eq 𝒩] (ℋ : well_behaved_soln 𝒩 T)
 
 instance (ψ : ∀ B, Tt T → X 𝒩 → 𝒫 B) (A : finset 𝒩) (t : Tt T) : ∀ y, decidable (y ∈ V ψ A t) :=
 by { delta V, apply_instance, }

@@ -2,10 +2,7 @@ import v_def
 
 local prefix `𝒫`:100 := fun {α : Type} (s : finset α), {t // t ≤ s}
 
-variables {𝒩 : Type} [decidable_eq 𝒩] {T : with_top ℝ}
-variables {ℋ : well_behaved_soln 𝒩 T}
-
-variables {ψ ψ' : ∀ (B : finset 𝒩), Tt T → X 𝒩 → 𝒫 B}
+variables {𝒩 : Type} {T : with_top ℝ} {ψ ψ' : ∀ (B : finset 𝒩), Tt T → X 𝒩 → 𝒫 B}
 
 lemma V_empty_eq_univ (t : Tt T) : V ψ ∅ t = set.univ :=
 begin
@@ -13,6 +10,8 @@ begin
   intro y,
   apply finset.empty_subset,
 end
+
+variables [decidable_eq 𝒩] {ℋ : well_behaved_soln 𝒩 T}
 
 lemma ssubsets_nonempty {A : finset 𝒩} {t : Tt T} {y : X 𝒩} : y ∉ V ψ A t → A.ssubsets.nonempty :=
 begin

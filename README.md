@@ -30,7 +30,7 @@ The survivors function determines debt and equity valuations in turn.
 Our result shows that the circle of definitions is sensibly resolved.
 
 Assumptions made are of a solution procedure `ℋ` for debt valuation and another `ℰ` for equity valuation satisfying properties obeyed by those we would use in practice.
-Also that for every set of banks there is an amount by which external assets could fall to make it unviable*.
+Also that for every nonempty set of banks there is an amount by which external assets could fall to make it unviable*.
 
 <p align="center"><img src="import-graph.svg" width="338pt" height="332pt" /></p>
 <p align="center">File Dependency Graph</p>
@@ -52,7 +52,7 @@ A *debt function* returns at any point in time and space a valuation for each ba
 def debt_fn (𝒩 : Type) (T : with_top ℝ) := ∀ (t : Tt T), X 𝒩 → 𝒩 → Tτ t → ℝ
 ```
 Our model of credit risk is a structural one.
-Properties of `ℋ` are modelled on those of a solution to the Black-Scholes-Merton parabolic partial differential equation.
+Properties of `ℋ` are based on those of a solver for the Black-Scholes-Merton partial differential equation.
 Given a valuation function defined outside some time-dependent domain `V` (implying initial/boundary conditions), `ℋ` will return a function defined on the whole space.
 ```lean
 structure well_behaved_soln :=
@@ -70,7 +70,7 @@ structure well_behaved_soln :=
 (mono_wrt_val_on_compl {V : Tt T → set (X 𝒩)} {v₁ v₂ : ∀ t y, y ∉ V t → Tτ t → ℝ} :
   (∀ t y h, v₁ t y h ≤ v₂ t y h) → ℋ v₁ ≤ ℋ v₂)
 ```
-The domain `V` associated with a set of banks `A` is exactly the region in which `A` is viable, and is derived from survivors function `ψ` as the set of points at which `ψ A = A`.
+The domain `V` associated with a set of banks `A` is exactly the region with `A` viable, derived from survivors function `ψ` as the set of points at which `ψ A = A`.
 ```lean
 def V (ψ : ∀ (B : finset 𝒩), Tt T → X 𝒩 → 𝒫 B) (A : finset 𝒩) : Tt T → set (X 𝒩) :=
 fun t y, A ≤ ψ A t y
@@ -117,7 +117,7 @@ structure survivors_fn (ψ :  ∀ (A : finset 𝒩), Tt T → X 𝒩 → 𝒫 A)
 
 With one additional assumption (*)
 ```lean
-variable (crash : ∀ ψ A t y,
+variable (crash : ∀ ψ {A : finset 𝒩} (h : A.nonempty) (t : Tt T) (y : X 𝒩),
   ∃ (η : ℝ) (hη : η ≤ 0) (i : 𝒩) (hi : i ∈ A), E_star ℰ (v ℋ ψ A) t (y + η) i ≤ 0)
 ```
 we are able to prove that a survivors function exists and is unique.

@@ -2,7 +2,7 @@ import v_def q_def
 
 local prefix `𝒫`:100 := fun {α : Type} (s : finset α), {t // t ≤ s}
 
-variables {𝒩 : Type} [decidable_eq 𝒩] {T : with_top ℝ}
+variables {𝒩 : Type} {T : with_top ℝ}
 
 def mono_wrt_assets {β : Tt T → Type*} [∀ t, has_le (β t)] (f : ∀ (t : Tt T), X 𝒩 → β t) : Prop :=
 ∀ (η : ℝ) (hη : 0 ≤ η) (t : Tt T) (y : X 𝒩), f t y ≤ f t (y + η)
@@ -42,8 +42,7 @@ instance : has_coe_to_fun (equity_function 𝒩 T) :=
 { F := fun _, ∀ (t : Tt T), X 𝒩 → (𝒩 → Tτ t → ℝ) → 𝒩 → ℝ,
   coe := equity_function.ℰ }
 
-variables (ℋ : well_behaved_soln 𝒩 T) (ℰ : equity_function 𝒩 T)
-
+variables [decidable_eq 𝒩] (ℋ : well_behaved_soln 𝒩 T) (ℰ : equity_function 𝒩 T)
 
 def v_ {A : finset 𝒩} (ψ : ∀ B < A, Tt T → X 𝒩 → 𝒫 B) : ∀ B < A, debt_fn 𝒩 T :=
 finset.strong_induction (fun B υ hB, v_mk ℋ (ψ B hB) (fun C hC, υ C hC (trans hC hB)))
