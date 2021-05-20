@@ -99,7 +99,7 @@ begin
   { intros C hlt,
     haveI : ∀ (h : C ∈ 𝒮), decidable (@q _ 𝒮b r ⟨C, h⟩) := fun h, ih ⟨C, h⟩ hlt,
     apply_instance, },
-  cases finset.decidable_exists_of_decidable_ssubsets this with hne he,
+  cases finset.decidable_exists_of_decidable_ssubsets' this with hne he,
   { apply is_false,
     intro hq,
     rcases hq with _ | ⟨_, ⟨C, hC⟩, hlt, hr, hq⟩,
