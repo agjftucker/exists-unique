@@ -43,16 +43,16 @@ At `t` we will be interested in maturities `τ` between `t` and `T`.
 def Tt (T : with_top ℝ) : set ℝ := {t : ℝ | 0 ≤ t ∧ (t : with_top ℝ) < T}
 def Tτ {T : with_top ℝ} (t : Tt T) : set ℝ := {τ : ℝ | t.1 < τ ∧ (τ : with_top ℝ) ≤ T}
 ```
-Where `𝒩` is the set of banks, `X 𝒩` is the space of (log) external asset values.
+Where `𝒩` is the set of banks, `X 𝒩` is the space of (log) external asset values associated.
 ```lean
 def X (𝒩 : Type) := 𝒩 → ℝ
 ```
-A *debt function* returns at any point in time and space a valuation for each bank's debt for each possible maturity.
+A *debt function* returns for a given point in time and space a valuation for each bank's debt for each possible maturity.
 ```lean
 def debt_fn (𝒩 : Type) (T : with_top ℝ) := ∀ (t : Tt T), X 𝒩 → 𝒩 → Tτ t → ℝ
 ```
 Our model of credit risk is a structural one.
-Properties of `ℋ` are based on those of a solver for the Black-Scholes-Merton partial differential equation.
+Properties of `ℋ` are based on those of a solution procedure for the Black-Scholes-Merton partial differential equation.
 Given a valuation function defined outside some time-dependent domain `V` (implying initial/boundary conditions), `ℋ` will return a function defined on the whole space.
 ```lean
 structure well_behaved_soln :=
@@ -70,19 +70,19 @@ structure well_behaved_soln :=
 (mono_wrt_val_on_compl {V : Tt T → set (X 𝒩)} {v₁ v₂ : ∀ t y, y ∉ V t → Tτ t → ℝ} :
   (∀ t y h, v₁ t y h ≤ v₂ t y h) → ℋ v₁ ≤ ℋ v₂)
 ```
-The domain `V` associated with a set of banks `A` is derived from survivors function `ψ` as the set of points for which `ψ A = A`.
-We will later prove that it is exactly the region with `A` viable.
+We define also a function named `V`, argument `ψ`, returning the set of points with `ψ A = A`.
+It is the domain passed to `ℋ`.
+Later we will ask that `V` correspond to the region with `A` viable.
 ```lean
 def V (ψ : ∀ (B : finset 𝒩), Tt T → X 𝒩 → 𝒫 B) (A : finset 𝒩) : Tt T → set (X 𝒩) :=
 fun t y, A ≤ ψ A t y
 ```
 Given a set of banks `B`, a survivors function for `B` and a debt function for each proper subset of `B`, we use `ℋ` to calculate a debt function for `B` itself.
 ```lean
-def v_mk {B : finset 𝒩} (ψB : Tt T → X 𝒩 → 𝒫 B) :
-  (∀ C < B, debt_fn 𝒩 T) → debt_fn 𝒩 T :=
-fun υ t y i, if i ∈ B then ℋ (fun s x h, υ (ψB s x) ⟨(ψB s x).prop, h⟩ s x i) t y else 0
+def v_mk {B : finset 𝒩} (ψB : Tt T → X 𝒩 → 𝒫 B) (υ : ∀ C < B, debt_fn 𝒩 T) : debt_fn 𝒩 T :=
+fun t y i, if i ∈ B then ℋ (fun s x h, υ (ψB s x) ⟨(ψB s x).prop, h⟩ s x i) t y else 0
 ```
-By induction we find debt functions for each set of banks up to the full set (likely the one we want).
+By induction we find debt functions for each set of banks up to the full set (likely what we want).
 ```lean
 def v (ψ : ∀ (B : finset 𝒩), Tt T → X 𝒩 → 𝒫 B) : finset 𝒩 → debt_fn 𝒩 T :=
 finset.strong_induction (fun B, v_mk ℋ (ψ B))
