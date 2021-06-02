@@ -7,7 +7,7 @@ variables {α : Type*} [semilattice_sup_bot α]
 
 /-- To derive our conclusions about `q r` we require of relation `r` certain abstract properties.
 Let `r b` denote the set comprising those elements `c` for which `r b c`. Then `r` is a
-`support_rel` if each `r b` forms a `sup_bot_semilattice` and if `r` is nondecreasing, i.e. `d ≤ c`
+`support_rel` if each `r b` forms a `semilattice_sup_bot` and if `r` is nondecreasing, i.e. `d ≤ c`
 implies `r d ⊆ r c`. -/
 class support_rel {α β} [preorder α] [semilattice_sup_bot β] (r : α → β → Prop) : Prop :=
 (bottom : ∀ (b : α), r b ⊥)
