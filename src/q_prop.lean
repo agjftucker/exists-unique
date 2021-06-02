@@ -5,28 +5,32 @@ local prefix `𝒫`:100 := λ {α : Type} (s : finset α), {t // t ≤ s}
 section
 variables {α : Type*} [semilattice_sup_bot α]
 
-class tuckerian {α β} [preorder α] [semilattice_sup_bot β] (r : α → β → Prop) : Prop :=
+/-- To derive our conclusions about `q r` we require of relation `r` certain abstract properties.
+Let `r b` denote the set comprising those elements `c` for which `r b c`. Then `r` is a
+`support_rel` if each `r b` forms a `sup_bot_semilattice` and if `r` is nondecreasing, i.e. `d ≤ c`
+implies `r d ⊆ r c`. -/
+class support_rel {α β} [preorder α] [semilattice_sup_bot β] (r : α → β → Prop) : Prop :=
 (bottom : ∀ (b : α), r b ⊥)
 (sup : ∀ (b c : β) (d : α), r d b → r d c → r d (b ⊔ c))
 (mono : ∀ (c d : α), d ≤ c → ∀ (b : β), r d b → r c b)
 
-variables {r : α → α → Prop} [ht : tuckerian r]
+variables {r : α → α → Prop} [ht : support_rel r]
 include ht
 
 lemma r_self_of_q {b : α} : q r b → r b b :=
 begin
   intro hqb,
   cases hqb with _ c hlt hr hqc,
-  { exact tuckerian.bottom ⊥, },
-  { exact tuckerian.mono b c (le_of_lt hlt) b hr, },
+  { exact support_rel.bottom ⊥, },
+  { exact support_rel.mono b c (le_of_lt hlt) b hr, },
 end
 
 lemma r_joins_of_q {b c d : α} : r d c → q r b → r (b ⊔ d) (b ⊔ c) :=
 begin
   intros hr hq,
-  apply tuckerian.sup,
-  { exact tuckerian.mono (b ⊔ d) b le_sup_left b (r_self_of_q hq), },
-  { exact tuckerian.mono (b ⊔ d) d le_sup_right c hr, },
+  apply support_rel.sup,
+  { exact support_rel.mono (b ⊔ d) b le_sup_left b (r_self_of_q hq), },
+  { exact support_rel.mono (b ⊔ d) d le_sup_right c hr, },
 end
 
 lemma q_sup_of_foreach {b c : α} : q r b → q r c → q r (b ⊔ c) :=
@@ -76,7 +80,7 @@ end
 namespace si
 variables {β : Type} [decidable_eq β] {A : finset β}
 
-variables {r : 𝒫 A → 𝒫 A → Prop} [decidable_rel r] [ht : tuckerian r]
+variables {r : 𝒫 A → 𝒫 A → Prop} [decidable_rel r] [ht : support_rel r]
 include ht
 
 lemma q_φ : q r (si.φ r) :=

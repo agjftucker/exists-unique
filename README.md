@@ -70,7 +70,8 @@ structure well_behaved_soln :=
 (mono_wrt_val_on_compl {V : Tt T → set (X 𝒩)} {v₁ v₂ : ∀ t y, y ∉ V t → Tτ t → ℝ} :
   (∀ t y h, v₁ t y h ≤ v₂ t y h) → ℋ v₁ ≤ ℋ v₂)
 ```
-The domain `V` associated with a set of banks `A` is exactly the region with `A` viable, derived from survivors function `ψ` as the set of points at which `ψ A = A`.
+The domain `V` associated with a set of banks `A` is derived from survivors function `ψ` as the set of points for which `ψ A = A`.
+We will later prove that it is exactly the region with `A` viable.
 ```lean
 def V (ψ : ∀ (B : finset 𝒩), Tt T → X 𝒩 → 𝒫 B) (A : finset 𝒩) : Tt T → set (X 𝒩) :=
 fun t y, A ≤ ψ A t y

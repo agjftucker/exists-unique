@@ -91,12 +91,12 @@ begin
   { exact rDC i hC, },
 end
 
-instance (t : Tt T) (y : X 𝒩) : tuckerian (r ℋ ℰ t y) :=
+instance (t : Tt T) (y : X 𝒩) : support_rel (r ℋ ℰ t y) :=
 { bottom := hr0,
   sup := hr2,
   mono := hr1 }
 
-instance (A : finset 𝒩) (t : Tt T) (y : X 𝒩) : tuckerian (r' ℋ ℰ A t y) :=
+instance (A : finset 𝒩) (t : Tt T) (y : X 𝒩) : support_rel (r' ℋ ℰ A t y) :=
 { bottom := fun B, hr0 ↑B,
   sup := fun B C D, hr2 ↑B ↑C ↑D,
   mono := fun C D hle B, hr1 ↑C ↑D hle ↑B }
